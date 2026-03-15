@@ -1,0 +1,813 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SmartCare System{% endblock %}
+
+{% block content %}
+{% if not user.is_doctor %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+    <p class="text-gray-600">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+</div>
+{% endif %}
+
+{% if user.is_admin %}
+<!-- Admin Dashboard -->
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-8 mb-8 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Welcome back, {{ user.get_full_name|default:user.email }}</h1>
+                    <p class="text-blue-100 text-lg">Manage the healthcare system efficiently</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-blue-100 text-sm">Last login</div>
+                    <div class="text-white font-medium">{{ user.last_login|date:"F d, Y g:i A"|default:'First time login' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-600">Total Users</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_users }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-user-injured text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-600">Patients</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_patients }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                        <i class="fas fa-user-md text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-600">Doctors</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ total_doctors }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-th-large mr-3 text-blue-600"></i>Quick Actions
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="{% url 'accounts:user_list' %}" 
+                   class="group bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                        <div class="font-medium">Manage Users</div>
+                        <div class="text-xs text-blue-100 mt-1">View all users</div>
+                    </div>
+                </a>
+                <a href="{% url 'appointments:appointment_list' %}" 
+                   class="group bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-calendar-check text-xl"></i>
+                        </div>
+                        <div class="font-medium">Appointments</div>
+                        <div class="text-xs text-green-100 mt-1">Manage appointments</div>
+                    </div>
+                </a>
+                <a href="{% url 'billing:bill_list' %}" 
+                   class="group bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-file-invoice-dollar text-xl"></i>
+                        </div>
+                        <div class="font-medium">Billing</div>
+                        <div class="text-xs text-orange-100 mt-1">View bills & payments</div>
+                    </div>
+                </a>
+                <a href="{% url 'medical_records:medical_record_list' %}" 
+                   class="group bg-gradient-to-br from-teal-500 to-teal-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-file-medical text-xl"></i>
+                        </div>
+                        <div class="font-medium">Medical Records</div>
+                        <div class="text-xs text-teal-100 mt-1">Patient records</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif user.is_doctor %}
+<!-- Doctor Dashboard -->
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Header -->
+        <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl shadow-xl p-8 mb-8 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Welcome back, Dr. {{ user.get_full_name|default:user.email }}</h1>
+                    <p class="text-emerald-100 text-lg">Manage your practice and patient care efficiently</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-emerald-100 text-sm">Last login</div>
+                    <div class="text-white font-medium">{{ user.last_login|date:"F d, Y g:i A"|default:'First time login' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-th-large mr-3 text-emerald-600"></i>Quick Actions
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="{% url 'appointments:appointment_list' %}" 
+                   class="group bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-calendar-check text-xl"></i>
+                        </div>
+                        <div class="font-medium">Manage Appointments</div>
+                        <div class="text-xs text-blue-100 mt-1">Approve/Decline requests</div>
+                    </div>
+                </a>
+                <a href="{% url 'prescriptions:list' %}" 
+                   class="group bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-prescription text-xl"></i>
+                        </div>
+                        <div class="font-medium">Prescriptions</div>
+                        <div class="text-xs text-purple-100 mt-1">Patient medications</div>
+                    </div>
+                </a>
+                <a href="{% url 'billing:bill_list' %}" 
+                   class="group bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-file-invoice-dollar text-xl"></i>
+                        </div>
+                        <div class="font-medium">View Bills</div>
+                        <div class="text-xs text-orange-100 mt-1">View generated invoices</div>
+                    </div>
+                </a>
+                <a href="{% url 'medical_records:medical_record_list' %}" 
+                   class="group bg-gradient-to-br from-teal-500 to-teal-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-file-medical text-xl"></i>
+                        </div>
+                        <div class="font-medium">Medical Records</div>
+                        <div class="text-xs text-teal-100 mt-1">Patient records & history</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Today's Appointments -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                        <div class="flex justify-between items-center text-white">
+                            <h2 class="text-xl font-bold flex items-center">
+                                <i class="fas fa-calendar-day mr-3"></i>Today's Appointments
+                            </h2>
+                            <a href="{% url 'appointments:appointment_list' %}" 
+                               class="text-blue-100 hover:text-white transition-colors flex items-center">
+                                View All
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if appointments %}
+                            <div class="space-y-4">
+                                {% for appointment in appointments %}
+                                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-start space-x-4">
+                                                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                    <i class="fas fa-user-injured text-blue-600 text-lg"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-900 text-lg">{{ appointment.patient.get_full_name|default:appointment.patient.email }}</h4>
+                                                    <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
+                                                        <div class="flex items-center">
+                                                            <i class="fas fa-calendar mr-2 text-blue-500"></i>
+                                                            {{ appointment.date_time|date:"F d, Y" }}
+                                                        </div>
+                                                        <div class="flex items-center">
+                                                            <i class="fas fa-clock mr-2 text-blue-500"></i>
+                                                            {{ appointment.date_time|time:"g:i A" }}
+                                                        </div>
+                                                        <div class="flex items-center">
+                                                            <i class="fas fa-stethoscope mr-2 text-blue-500"></i>
+                                                            {{ appointment.reason|truncatechars:50 }}
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-gray-700">{{ appointment.reason|truncatechars:120 }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full
+                                                    {% if appointment.status == 'confirmed' %}bg-green-100 text-green-800
+                                                    {% elif appointment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                    {{ appointment.status|title }}
+                                                </span>
+                                                <div class="mt-3 space-y-2">
+                                                    {% if appointment.status == 'pending' %}
+                                                        <div class="flex space-x-2">
+                                                            <a href="{% url 'appointments:approve_appointment' appointment.id %}" 
+                                                               class="inline-flex items-center px-3 py-1 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition-colors">
+                                                                <i class="fas fa-check mr-1"></i>Approve
+                                                            </a>
+                                                            <a href="{% url 'appointments:cancel_appointment' appointment.id %}" 
+                                                               class="inline-flex items-center px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition-colors">
+                                                                <i class="fas fa-times mr-1"></i>Cancel
+                                                            </a>
+                                                        </div>
+                                                    {% elif appointment.status == 'confirmed' %}
+                                                        <div class="flex space-x-2">
+                                                            <a href="{% url 'appointments:complete_appointment' appointment.id %}" 
+                                                               class="inline-flex items-center px-3 py-1 bg-emerald-600 text-white text-xs font-medium rounded hover:bg-emerald-700 transition-colors">
+                                                                <i class="fas fa-check-double mr-1"></i>Mark Complete
+                                                            </a>
+                                                            <a href="{% url 'appointments:cancel_appointment' appointment.id %}" 
+                                                               class="inline-flex items-center px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition-colors">
+                                                                <i class="fas fa-times mr-1"></i>Cancel
+                                                            </a>
+                                                        </div>
+                                                    {% endif %}
+                                                    <a href="{% url 'appointments:appointment_detail' appointment.id %}" 
+                                                       class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                                        <i class="fas fa-eye mr-1"></i>View Details
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-12">
+                                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-calendar-times text-gray-400 text-2xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No appointments today</h3>
+                                <p class="text-gray-600 mb-6">Your schedule is clear for today</p>
+                                <a href="{% url 'appointments:appointment_list' %}" 
+                                   class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-list mr-2"></i>Manage All Appointments
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Prescriptions -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                        <div class="flex justify-between items-center text-white">
+                            <h2 class="text-xl font-bold flex items-center">
+                                <i class="fas fa-prescription-bottle-alt mr-3"></i>Recent Prescriptions
+                            </h2>
+                            <a href="{% url 'prescriptions:list' %}" 
+                               class="text-purple-100 hover:text-white transition-colors flex items-center">
+                                View All
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if prescriptions %}
+                            <div class="space-y-4">
+                                {% for prescription in prescriptions %}
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900">{{ prescription.patient.get_full_name|default:prescription.patient.email }}</h4>
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <span class="text-xs px-2 py-0.5 rounded-full {% if prescription.consultation_type == 'online_consultant' %}bg-blue-100 text-blue-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                                        {% if prescription.consultation_type == 'online_consultant' %}<i class="fas fa-video mr-1"></i>Online{% else %}<i class="fas fa-user-injured mr-1"></i>Physical{% endif %}
+                                                    </span>
+                                                    <span class="text-sm text-gray-600">{{ prescription.created_at|date:"F d, Y" }}</span>
+                                                </div>
+                                                <p class="text-gray-700">{{ prescription.diagnosis|truncatechars:100 }}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <a href="{% url 'prescriptions:detail' prescription.id %}" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                                                    <i class="fas fa-eye mr-1"></i>View
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-prescription-bottle-alt text-gray-400 text-xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No prescriptions yet</h3>
+                                <p class="text-gray-600">Start prescribing medications to patients</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Bills with Payment Status -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4">
+                        <div class="flex justify-between items-center text-white">
+                            <h2 class="text-xl font-bold flex items-center">
+                                <i class="fas fa-file-invoice-dollar mr-3"></i>Recent Bills & Payments
+                            </h2>
+                            <a href="{% url 'billing:bill_list' %}" 
+                               class="text-orange-100 hover:text-white transition-colors flex items-center">
+                                View All
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if bills_with_payments %}
+                            <div class="space-y-4">
+                                {% for bill_data in bills_with_payments %}
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <h4 class="font-semibold text-gray-900">Bill #{{ bill_data.bill.id }}</h4>
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                                        {% if bill_data.is_fully_paid %}bg-green-100 text-green-800
+                                                        {% elif bill_data.bill.status == 'sent' %}bg-yellow-100 text-yellow-800
+                                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                                        {% if bill_data.is_fully_paid %}Paid
+                                                        {% else %}Partially Paid{% endif %}
+                                                    </span>
+                                                </div>
+                                                <p class="text-sm text-gray-600 mb-2">
+                                                    Patient: {{ bill_data.bill.patient.get_full_name|default:bill_data.bill.patient.email }}
+                                                </p>
+                                                <p class="text-sm text-gray-600 mb-3">
+                                                    {{ bill_data.bill.created_at|date:"F d, Y" }}
+                                                </p>
+                                                
+                                                <!-- Payment Summary -->
+                                                <div class="bg-gray-50 rounded-lg p-3 space-y-1">
+                                                    <div class="flex justify-between text-sm">
+                                                        <span class="text-gray-600">Total Amount:</span>
+                                                        <span class="font-medium text-gray-900">Rs. {{ bill_data.bill.total_amount }}</span>
+                                                    </div>
+                                                    <div class="flex justify-between text-sm">
+                                                        <span class="text-gray-600">Amount Paid:</span>
+                                                        <span class="font-medium text-green-600">Rs. {{ bill_data.paid_amount }}</span>
+                                                    </div>
+                                                    {% if bill_data.remaining_balance > 0 %}
+                                                        <div class="flex justify-between text-sm pt-2 border-t border-gray-200">
+                                                            <span class="text-gray-700 font-medium">Remaining:</span>
+                                                            <span class="font-bold text-orange-600">Rs. {{ bill_data.remaining_balance }}</span>
+                                                        </div>
+                                                        <div class="mt-2 p-2 bg-orange-100 rounded">
+                                                            <p class="text-xs text-orange-800">
+                                                                <i class="fas fa-info-circle mr-1"></i>
+                                                                Rs. {{ bill_data.remaining_balance }} remaining to be paid
+                                                            </p>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="mt-2 p-2 bg-green-100 rounded">
+                                                            <p class="text-xs text-green-800">
+                                                                <i class="fas fa-check-circle mr-1"></i>
+                                                                Bill fully paid
+                                                            </p>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <a href="{% url 'billing:bill_detail' bill_data.bill.id %}" 
+                                                   class="text-orange-600 hover:text-orange-800 font-medium text-sm">
+                                                    <i class="fas fa-eye mr-1"></i>View Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-file-invoice-dollar text-gray-400 text-xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No bills yet</h3>
+                                <p class="text-gray-600">Bills will appear here when you create them for appointments</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="space-y-8">
+                <!-- Practice Stats -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Today's Activity</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-calendar text-blue-600"></i>
+                                </div>
+                                <span class="text-gray-700">Today's Appointments</span>
+                            </div>
+                            <span class="font-semibold text-blue-600">{{ today_appointments_count }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-check-circle text-green-600"></i>
+                                </div>
+                                <span class="text-gray-700">Confirmed</span>
+                            </div>
+                            <span class="font-semibold text-green-600">{{ confirmed_appointments_count }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-clock text-yellow-600"></i>
+                                </div>
+                                <span class="text-gray-700">Pending</span>
+                            </div>
+                            <span class="font-semibold text-yellow-600">{{ pending_appointments_count }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Doctors -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Colleagues</h3>
+                    {% if available_doctors %}
+                        <div class="space-y-3">
+                            {% for doctor in available_doctors %}
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user-md text-orange-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-sm">Dr. {{ doctor.get_full_name|default:doctor.email }}</p>
+                                            <p class="text-xs text-gray-600">{{ doctor.doctor_profile.specialization|default:'General Practice' }}</p>
+                                        </div>
+                                    </div>
+                                    {% if doctor.doctor_profile.is_available %}
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">
+                                            Available
+                                        </span>
+                                    {% else %}
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-semibold">
+                                            Busy
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-user-slash text-gray-400 text-xl mb-2"></i>
+                            <p class="text-gray-600 text-sm">No other doctors available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% elif user.is_patient %}
+<!-- Patient Dashboard -->
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-xl p-8 mb-8 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Welcome back, {{ user.get_full_name|default:user.email }}</h1>
+                    <p class="text-blue-100 text-lg">Manage your healthcare and appointments efficiently</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-blue-100 text-sm">Last login</div>
+                    <div class="text-white font-medium">{{ user.last_login|date:"F d, Y g:i A"|default:'First time login' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-th-large mr-3 text-blue-600"></i>Quick Actions
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="{% url 'appointments:appointment_list' %}" 
+                   class="group bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-calendar-plus text-xl"></i>
+                        </div>
+                        <div class="font-medium">Book Appointment</div>
+                        <div class="text-xs text-green-100 mt-1">Schedule with doctors</div>
+                    </div>
+                </a>
+                <a href="{% url 'prescriptions:list' %}" 
+                   class="group bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-prescription text-xl"></i>
+                        </div>
+                        <div class="font-medium">My Prescriptions</div>
+                        <div class="text-xs text-purple-100 mt-1">View medications</div>
+                    </div>
+                </a>
+                <a href="{% url 'billing:payment_history' %}" 
+                   class="group bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-credit-card text-xl"></i>
+                        </div>
+                        <div class="font-medium">Pay Bills</div>
+                        <div class="text-xs text-orange-100 mt-1">Make payments</div>
+                    </div>
+                </a>
+                <a href="{% url 'accounts:profile' %}" 
+                   class="group bg-gradient-to-br from-gray-500 to-gray-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div class="font-medium">My Profile</div>
+                        <div class="text-xs text-gray-100 mt-1">Personal information</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Upcoming Appointments -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                        <div class="flex justify-between items-center text-white">
+                            <h2 class="text-xl font-bold flex items-center">
+                                <i class="fas fa-calendar-day mr-3"></i>Upcoming Appointments
+                            </h2>
+                            <a href="{% url 'appointments:appointment_list' %}" 
+                               class="text-green-100 hover:text-white transition-colors flex items-center">
+                                View All
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if appointments %}
+                            <div class="space-y-4">
+                                {% for appointment in appointments %}
+                                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-start space-x-4">
+                                                <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                    <i class="fas fa-user-md text-green-600 text-lg"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-900 text-lg">Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.email }}</h4>
+                                                    <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
+                                                        <div class="flex items-center">
+                                                            <i class="fas fa-calendar mr-2"></i>
+                                                            {{ appointment.date_time|date:"F d, Y" }}
+                                                        </div>
+                                                        <div class="flex items-center">
+                                                            <i class="fas fa-clock mr-2"></i>
+                                                            {{ appointment.date_time|time:"g:i A" }}
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-gray-700 mb-3">{{ appointment.reason|truncatechars:100 }}</p>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="px-3 py-1 text-xs font-semibold rounded-full
+                                                            {% if appointment.status == 'confirmed' %}bg-green-100 text-green-800
+                                                            {% elif appointment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                            {{ appointment.status|title }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-col space-y-2">
+                                                <a href="{% url 'appointments:appointment_detail' appointment.id %}" 
+                                                   class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm">
+                                                    <i class="fas fa-eye mr-2"></i>View Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-calendar-times text-gray-400 text-xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No upcoming appointments</h3>
+                                <p class="text-gray-600 mb-4">Book an appointment to get started</p>
+                                <a href="{% url 'appointments:appointment_list' %}" 
+                                   class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Book Appointment
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Prescriptions -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                        <div class="flex justify-between items-center text-white">
+                            <h2 class="text-xl font-bold flex items-center">
+                                <i class="fas fa-prescription-bottle-alt mr-3"></i>Recent Prescriptions
+                            </h2>
+                            <a href="{% url 'prescriptions:list' %}" 
+                               class="text-purple-100 hover:text-white transition-colors flex items-center">
+                                View All
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if prescriptions %}
+                            <div class="space-y-4">
+                                {% for prescription in prescriptions %}
+                                    <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-start space-x-4">
+                                                <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                    <i class="fas fa-user-md text-purple-600 text-lg"></i>
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-900 text-lg">Dr. {{ prescription.doctor.get_full_name|default:prescription.doctor.email }}</h4>
+                                                    <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
+                                                        <div class="flex items-center">
+                                                            <i class="fas fa-calendar mr-2"></i>
+                                                            {{ prescription.created_at|date:"F d, Y" }}
+                                                        </div>
+                                                        <div class="flex items-center">
+                                                            <i class="fas fa-pills mr-2"></i>
+                                                            {{ prescription.medications.count }} medications
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-gray-700 mb-3">{{ prescription.diagnosis|truncatechars:100 }}</p>
+                                                    <div class="flex items-center space-x-2">
+                                                        {% if prescription.is_active %}
+                                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                                Active
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                                Inactive
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-col space-y-2">
+                                                <a href="{% url 'prescriptions:detail' prescription.id %}" 
+                                                   class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm">
+                                                    <i class="fas fa-eye mr-2"></i>View Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-prescription-bottle-alt text-gray-400 text-xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No prescriptions yet</h3>
+                                <p class="text-gray-600">Your prescriptions will appear here after appointments</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="space-y-8">
+                <!-- Payment Summary -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Today's Billing</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-file-invoice-dollar text-orange-600"></i>
+                                </div>
+                                <span class="text-gray-700">Today's Bills</span>
+                            </div>
+                            <span class="font-semibold text-orange-600">{{ today_bills_count|default:0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-check text-green-600"></i>
+                                </div>
+                                <span class="text-gray-700">Paid Bills</span>
+                            </div>
+                            <span class="font-semibold text-green-600">{{ today_paid_bills_count|default:0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-credit-card text-blue-600"></i>
+                                </div>
+                                <span class="text-gray-700">Today's Paid</span>
+                            </div>
+                            <span class="font-semibold text-blue-600">Rs. {{ today_paid_amount|default:0 }}</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'billing:payment_history' %}" 
+                           class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition-colors text-center">
+                            <i class="fas fa-credit-card mr-2"></i>Pay Bills
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Available Doctors -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Available Doctors</h3>
+                    {% if available_doctors %}
+                        <div class="space-y-3">
+                            {% for doctor in available_doctors %}
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user-md text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 text-sm">Dr. {{ doctor.get_full_name|default:doctor.email }}</p>
+                                            <p class="text-xs text-gray-600">{{ doctor.doctor_profile.specialization|default:'General Practice' }}</p>
+                                        </div>
+                                    </div>
+                                    {% if doctor.doctor_profile.is_available %}
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">
+                                            Available
+                                        </span>
+                                    {% else %}
+                                        <span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-semibold">
+                                            Busy
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-user-slash text-gray-400 text-xl mb-2"></i>
+                            <p class="text-gray-600 text-sm">No doctors available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            {% endif %}
+{% endblock %}

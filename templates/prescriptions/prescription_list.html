@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Recent Prescriptions - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-center">
+                <i class="fas fa-prescription-bottle-alt text-blue-600 text-3xl mb-2"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Recent Prescriptions</h2>
+                <p class="text-gray-600">View and manage your medical prescriptions</p>
+            </div>
+            {% if request.user.is_doctor %}
+                <a href="{% url 'prescriptions:create' %}" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Create Prescription
+                </a>
+            {% elif request.user.is_patient %}
+                <a href="{% url 'appointments:appointment_list' %}" class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors">
+                    <i class="fas fa-calendar-plus mr-2"></i>Request Appointment
+                </a>
+            {% endif %}
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-green-50 rounded-lg p-4 text-center">
+                <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-green-800">{{ today_prescriptions|length }}</div>
+                <div class="text-sm text-green-600">Today's Prescriptions</div>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-4 text-center">
+                <i class="fas fa-pills text-purple-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-purple-800">
+                    {% if today_prescriptions %}
+                        {% for prescription in today_prescriptions %}
+                            {{ prescription.medications.count }}
+                            {% if not forloop.last %}+{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="text-sm text-purple-600">Today's Medications</div>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                <i class="fas fa-calendar-day text-blue-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-blue-800">
+                    {% if today_prescriptions %}
+                        {{ today_prescriptions|length }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="text-sm text-blue-600">Today</div>
+            </div>
+        </div>
+        
+        <!-- Today's Prescriptions -->
+        {% if today_prescriptions %}
+            <div class="space-y-4">
+                {% for prescription in today_prescriptions %}
+                    <div class="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user-md text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        {% if request.user.is_patient %}
+                                            <h3 class="font-semibold text-gray-800">Dr. {{ prescription.doctor.get_full_name|default:prescription.doctor.email }}</h3>
+                                            <p class="text-sm text-gray-600">{{ prescription.created_at|date:"F d, Y" }} at {{ prescription.created_at|time:"g:i A" }}</p>
+                                        {% else %}
+                                            <h3 class="font-semibold text-gray-800">{{ prescription.patient.get_full_name|default:prescription.patient.email }}</h3>
+                                            <p class="text-sm text-gray-600">{{ prescription.created_at|date:"F d, Y" }} at {{ prescription.created_at|time:"g:i A" }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h4 class="font-medium text-gray-700 mb-1">Diagnosis:</h4>
+                                    <p class="text-gray-600 bg-white p-3 rounded border">{{ prescription.diagnosis|truncatechars:150 }}</p>
+                                </div>
+                                
+                                {% if prescription.medications.exists %}
+                                    <div class="mb-3">
+                                        <h4 class="font-medium text-gray-700 mb-2">Medications ({{ prescription.medications.count }}):</h4>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {% for medication in prescription.medications.all %}
+                                                <div class="bg-white p-2 rounded border text-sm">
+                                                    <span class="font-medium text-gray-800">{{ medication.medicine_name }}</span>
+                                                    <span class="text-gray-600"> - {{ medication.dosage }}, {{ medication.get_frequency_display }}</span>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if prescription.follow_up_date %}
+                                    <div class="mb-3">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-calendar-check mr-2"></i>
+                                            Follow-up: {{ prescription.follow_up_date|date:"F d, Y" }}
+                                        </span>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Status Badge -->
+                                <div class="mb-4">
+                                    {% if prescription.is_active %}
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                            Active
+                                        </span>
+                                    {% else %}
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- View Details Button at Bottom -->
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <a href="{% url 'prescriptions:detail' prescription.id %}" 
+                               class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm text-center">
+                                <i class="fas fa-eye mr-2"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- View All Button -->
+            {% if prescriptions.count > 5 %}
+                <div class="mt-6 text-center">
+                    <a href="#" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-list mr-2"></i>View All Prescriptions ({{ prescriptions.count }})
+                    </a>
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <i class="fas fa-prescription-bottle-alt text-gray-400 text-5xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Prescriptions Found</h3>
+                <p class="text-gray-500 mb-6">
+                    {% if request.user.is_patient %}
+                        You don't have any prescriptions yet. Book an appointment to get a prescription from your doctor.
+                    {% else %}
+                        You haven't created any prescriptions yet. Create your first prescription after an appointment.
+                    {% endif %}
+                </p>
+                {% if request.user.is_doctor %}
+                    <a href="{% url 'prescriptions:create' %}" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Create First Prescription
+                    </a>
+                {% elif request.user.is_patient %}
+                    <a href="{% url 'appointments:appointment_list' %}" class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors">
+                        <i class="fas fa-calendar-plus mr-2"></i>Book Appointment
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

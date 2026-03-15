@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointment Details - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-center">
+                <i class="fas fa-calendar-check text-blue-600 text-3xl mb-2"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Appointment Details</h2>
+            </div>
+            <a href="{% url 'appointments:appointment_list' %}" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Appointments
+            </a>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Content - Essential Information Only -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Patient Information -->
+                <div class="bg-blue-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-user-injured mr-2 text-blue-600"></i>Patient Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <span class="font-medium text-gray-600">Full Name:</span>
+                            <span class="text-gray-800 ml-2 font-semibold">{{ appointment.patient_name|default:appointment.patient.get_full_name|default:appointment.patient.username|default:'Not provided' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Age:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.age|default:'Not provided' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Gender:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.get_gender_display|default:'Not provided' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Blood Group:</span>
+                            <span class="text-gray-800 ml-2 font-semibold text-red-600">{{ appointment.blood_group|default:'Not provided' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Phone:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.phone|default:appointment.patient.phone|default:'Not provided' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Email:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.email|default:appointment.patient.email }}</span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="font-medium text-gray-600">Address:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.address|default:'Not provided' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointment Details -->
+                <div class="bg-green-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-calendar-check mr-2 text-green-600"></i>Appointment Details
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <span class="font-medium text-gray-600">Date:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.date_time|date:"l, F d, Y" }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Time:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.date_time|time:"g:i A" }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Appointment Type:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.get_appointment_type_display|default:'Not specified' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Priority:</span>
+                            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if appointment.priority == 'critical' %}bg-red-100 text-red-800
+                                {% elif appointment.priority == 'high' %}bg-orange-100 text-orange-800
+                                {% elif appointment.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ appointment.get_priority_display|default:'Not specified' }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Status:</span>
+                            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if appointment.status == 'confirmed' %}bg-green-100 text-green-800
+                                {% elif appointment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif appointment.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% elif appointment.status == 'completed' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ appointment.get_status_display }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Booking Date:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.created_at|date:"F d, Y g:i A" }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Visit Reason and Symptoms -->
+                    <div class="mt-4 space-y-3">
+                        <div>
+                            <h4 class="font-medium text-gray-600 mb-2">Reason for Visit:</h4>
+                            <div class="text-gray-800 bg-white p-3 rounded border">{{ appointment.reason }}</div>
+                        </div>
+                        {% if appointment.symptoms %}
+                            <div>
+                                <h4 class="font-medium text-gray-600 mb-2">Symptoms Description:</h4>
+                                <div class="text-gray-800 bg-white p-3 rounded border">{{ appointment.symptoms }}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar - Doctor Info & Actions -->
+            <div class="space-y-6">
+                <!-- Doctor Information -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-user-md mr-2 text-gray-600"></i>Doctor Information
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="font-medium text-gray-600">Name:</span>
+                            <span class="text-gray-800 ml-2 font-semibold">Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.email }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Email:</span>
+                            <span class="text-gray-800 ml-2 text-sm">{{ appointment.doctor.email }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Specialization:</span>
+                            <span class="text-gray-800 ml-2">{{ appointment.doctor.doctor_profile.specialization|default:'General Practice' }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-600">Consultation Fee:</span>
+                            <span class="text-gray-800 ml-2 font-semibold text-green-600">Rs. {{ appointment.doctor.doctor_profile.consultation_fee|default:'0' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Status -->
+                <div class="bg-yellow-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-credit-card mr-2 text-yellow-600"></i>Payment Status
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="font-medium text-gray-600">Appointment Payment:</span>
+                            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if appointment.is_paid %}bg-green-100 text-green-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {% if appointment.is_paid %}Paid{% else %}Pending{% endif %}
+                            </span>
+                        </div>
+                        {% if appointment.bill %}
+                            <div class="pt-2 border-t border-yellow-200">
+                                <span class="font-medium text-gray-600">Bill Status:</span>
+                                <span class="text-gray-800 ml-2">{{ appointment.bill.get_status_display }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="bg-white rounded-lg p-6 border">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Actions</h3>
+                    <div class="space-y-3">
+                        {% if request.user.is_patient and appointment.status != 'cancelled' and appointment.status != 'completed' %}
+                            <a href="{% url 'appointments:update_appointment' appointment.id %}" 
+                               class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-center block">
+                                <i class="fas fa-edit mr-2"></i>Edit Appointment
+                            </a>
+                            <a href="{% url 'appointments:cancel_appointment' appointment.id %}" 
+                               class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-center block">
+                                <i class="fas fa-times mr-2"></i>Cancel Appointment
+                            </a>
+                        {% endif %}
+                        
+                        {% if appointment.bill %}
+                            {% if appointment.bill.status != 'paid' %}
+                                <a href="{% url 'billing:payment' appointment.bill.id %}" 
+                                   class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors text-center block">
+                                    <i class="fas fa-credit-card mr-2"></i>Pay Now
+                                </a>
+                            {% else %}
+                                <div class="w-full px-4 py-2 bg-green-100 text-green-800 rounded-md font-medium text-center">
+                                    <i class="fas fa-check mr-2"></i>Bill Paid
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-gray-500 text-sm text-center p-3">
+                                <i class="fas fa-info-circle mr-2"></i>Bill will be generated after appointment
+                            </div>
+                        {% endif %}
+                        
+                        <a href="{% url 'appointments:appointment_list' %}" 
+                           class="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors text-center block">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to List
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

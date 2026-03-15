@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Bill from Prescription - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-center">
+                <i class="fas fa-file-invoice-dollar text-orange-600 text-3xl mb-2"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Create Bill from Prescription</h2>
+                <p class="text-gray-600">Set charges and create bill for prescription #{{ prescription.id }}</p>
+            </div>
+            <a href="{% url 'prescriptions:detail' prescription.id %}" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Prescription
+            </a>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Prescription Information -->
+        <div class="bg-blue-50 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                <i class="fas fa-prescription-bottle-alt mr-2"></i>Prescription Information
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="font-medium text-gray-600">Patient:</span>
+                    <span class="text-gray-800 ml-2">{{ prescription.patient.get_full_name|default:prescription.patient.email }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Prescription Date:</span>
+                    <span class="text-gray-800 ml-2">{{ prescription.created_at|date:"F d, Y" }}</span>
+                </div>
+                <div class="md:col-span-2">
+                    <span class="font-medium text-gray-600">Diagnosis:</span>
+                    <span class="text-gray-800 ml-2">{{ prescription.diagnosis }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bill Creation Form -->
+        <form method="POST" action="{% url 'billing:create_from_prescription' prescription.id %}">
+            {% csrf_token %}
+            
+            <!-- Medicine Details and Pricing -->
+            {% if prescription.medications.exists %}
+                <div class="bg-green-50 rounded-lg p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                        <i class="fas fa-pills mr-2"></i>Medicine Details and Pricing
+                    </h3>
+                    <div class="space-y-4">
+                        {% for medication in prescription.medications.all %}
+                            <div class="bg-white rounded-lg p-4 border border-green-200">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="md:col-span-2">
+                                        <h4 class="font-medium text-gray-800 mb-2">{{ medication.medicine_name }}</h4>
+                                        <div class="text-sm text-gray-600">
+                                            <span class="mr-3">Dosage: {{ medication.dosage }}</span>
+                                            <span class="mr-3">Frequency: {{ medication.get_frequency_display|default:medication.frequency }}</span>
+                                            <span>Duration: {{ medication.duration }}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Price (Rs.)</label>
+                                        <input type="number" 
+                                               name="medicine_price_{{ medication.id }}" 
+                                               class="medicine-price w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                               value="{% if 'paracetamol' in medication.medicine_name.lower %}50{% elif 'amoxicillin' in medication.medicine_name.lower %}120{% elif 'ibuprofen' in medication.medicine_name.lower %}80{% elif 'aspirin' in medication.medicine_name.lower %}40{% elif 'vitamin' in medication.medicine_name.lower %}60{% elif 'antibiotic' in medication.medicine_name.lower %}150{% elif 'painkiller' in medication.medicine_name.lower %}70{% else %}100{% endif %}"
+                                               min="0"
+                                               step="10"
+                                               data-medication-id="{{ medication.id }}"
+                                               required>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-4 p-3 bg-green-100 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-700">Total Medicine Cost:</span>
+                            <span class="font-bold text-green-700">Rs. <span id="total-medicine-cost">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Doctor Charges -->
+            <div class="bg-yellow-50 rounded-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                    <i class="fas fa-user-md mr-2"></i>Doctor Charges
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Consultation Fee (Rs.)</label>
+                        <input type="number" 
+                               name="consultation_fee" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                               value="500"
+                               min="0"
+                               step="50"
+                               id="consultation-fee">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lab Fee (Rs.)</label>
+                        <input type="number" 
+                               name="lab_fee" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                               value="0"
+                               min="0"
+                               step="50"
+                               id="lab-fee">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Other Fee (Rs.)</label>
+                        <input type="number" 
+                               name="other_fee" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                               value="0"
+                               min="0"
+                               step="50"
+                               id="other-fee">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount (Rs.)</label>
+                        <div class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md font-bold text-lg text-gray-800">
+                            Rs. <span id="total-amount">500</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notes Section -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                    <i class="fas fa-sticky-note mr-2"></i>Additional Notes
+                </h3>
+                <textarea name="notes" 
+                          rows="3" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          placeholder="Add any additional notes about the bill..."></textarea>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4">
+                <a href="{% url 'prescriptions:detail' prescription.id %}" 
+                   class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+                <button type="submit" 
+                        class="bg-orange-600 text-white px-6 py-3 rounded-md hover:bg-orange-700 transition-colors">
+                    <i class="fas fa-file-invoice-dollar mr-2"></i>Create Bill
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Calculate total amount dynamically
+function calculateTotal() {
+    const consultationFee = parseFloat(document.getElementById('consultation-fee').value) || 0;
+    const labFee = parseFloat(document.getElementById('lab-fee').value) || 0;
+    const otherFee = parseFloat(document.getElementById('other-fee').value) || 0;
+    
+    // Calculate total medicine cost
+    let totalMedicineCost = 0;
+    const medicinePrices = document.querySelectorAll('.medicine-price');
+    medicinePrices.forEach(input => {
+        totalMedicineCost += parseFloat(input.value) || 0;
+    });
+    
+    const totalAmount = consultationFee + labFee + otherFee + totalMedicineCost;
+    
+    document.getElementById('total-medicine-cost').textContent = totalMedicineCost.toFixed(0);
+    document.getElementById('total-amount').textContent = totalAmount.toFixed(0);
+}
+
+// Add event listeners to all input fields
+document.addEventListener('DOMContentLoaded', function() {
+    // Medicine price inputs
+    const medicinePrices = document.querySelectorAll('.medicine-price');
+    medicinePrices.forEach(input => {
+        input.addEventListener('input', calculateTotal);
+    });
+    
+    // Fee inputs
+    const feeInputs = ['consultation-fee', 'lab-fee', 'other-fee'];
+    feeInputs.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', calculateTotal);
+        }
+    });
+    
+    // Initial calculation
+    calculateTotal();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription #{{ prescription.id }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+        
+        .prescription-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border: 3px double #2c3e50;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        
+        .prescription-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border: 1px solid #2c3e50;
+            pointer-events: none;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2c3e50;
+            padding-bottom: 25px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: #e74c3c;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            margin: 8px 0 0 0;
+            font-size: 16px;
+            font-style: italic;
+        }
+        
+        .header .prescription-id {
+            font-size: 14px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 30px;
+        }
+        
+        .info-column {
+            width: 48%;
+            position: relative;
+        }
+        
+        .info-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -10px;
+            right: -10px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #2c3e50, transparent);
+        }
+        
+        .doctor-info, .patient-info {
+            padding: 20px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e74c3c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #34495e;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .diagnosis {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e8 100%);
+            padding: 20px;
+            border-left: 5px solid #e74c3c;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .diagnosis p {
+            margin: 0;
+            font-style: italic;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+        
+        .medications {
+            margin-bottom: 30px;
+        }
+        
+        .medication-item {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .medication-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #3498db, #2980b9);
+        }
+        
+        .medication-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 12px;
+            padding-left: 15px;
+        }
+        
+        .medication-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 14px;
+            color: #34495e;
+            padding-left: 15px;
+        }
+        
+        .medication-details div {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .medication-details strong {
+            color: #2c3e50;
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, #fff9e6 0%, #fef5e7 100%);
+            border: 1px solid #f39c12;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-style: italic;
+            color: #856404;
+            margin-left: 15px;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 25px;
+            border-top: 2px solid #2c3e50;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+        
+        .footer .warning {
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+        
+        .signature-section {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-bottom: 2px solid #2c3e50;
+            height: 60px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .signature-line::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e74c3c;
+        }
+        
+        .signature-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            color: rgba(231, 76, 60, 0.05);
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .rx-symbol {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #e74c3c;
+            color: white;
+            text-align: center;
+            line-height: 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        @media print {
+            body { 
+                padding: 0; 
+                background: white !important;
+            }
+            .prescription-container { 
+                box-shadow: none; 
+                border: 2px solid #000;
+                max-width: 100%;
+                margin: 0;
+                padding: 30px;
+            }
+            .header {
+                border-bottom: 2px solid #000;
+            }
+            .header::after {
+                background: #000;
+            }
+            .section-title {
+                border-bottom: 1px solid #000;
+                color: #000;
+            }
+            .diagnosis {
+                background: white !important;
+                border-left: 5px solid #000;
+            }
+            .medication-item {
+                background: white !important;
+                border: 1px solid #000;
+            }
+            .medication-item::before {
+                background: #000;
+            }
+            .instructions {
+                background: white !important;
+                border: 1px solid #000;
+                color: #000;
+                font-style: normal;
+            }
+            .footer {
+                border-top: 2px solid #000;
+                color: #000;
+            }
+            .signature-line {
+                border-bottom: 1px solid #000;
+            }
+            .signature-line::after {
+                background: #000;
+            }
+            .signature-label {
+                color: #000;
+            }
+            .watermark {
+                display: none;
+            }
+            /* Hide any unnecessary elements */
+            .no-print {
+                display: none !important;
+            }
+            /* Force black text for print */
+            * {
+                color: black !important;
+            }
+            /* Remove all background colors */
+            * {
+                background: transparent !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="prescription-container">
+        <!-- Watermark -->
+        <div class="watermark">SMARTCARE</div>
+        
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <span class="rx-symbol">Rx</span>
+                <span style="font-size: 28px; font-weight: bold; color: #2c3e50;">MEDICAL PRESCRIPTION</span>
+            </div>
+            <p>Prescription #{{ prescription.id }} | Date: {{ prescription.created_at|date:"F d, Y" }}</p>
+            <p class="prescription-id">Valid for 30 days from issue date</p>
+        </div>
+
+        <!-- Doctor and Patient Information -->
+        <div class="info-section">
+            <div class="info-column">
+                <div class="doctor-info">
+                    <div class="section-title">DOCTOR INFORMATION</div>
+                    <div class="info-label">Name:</div>
+                    <div class="info-value">Dr. {{ prescription.doctor.get_full_name|default:prescription.doctor.email }}</div>
+                    
+                    {% if prescription.doctor.doctor_profile.specialization %}
+                    <div class="info-label">Specialization:</div>
+                    <div class="info-value">{{ prescription.doctor.doctor_profile.specialization }}</div>
+                    {% endif %}
+                    
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">{{ prescription.doctor.email }}</div>
+                    
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value">{{ prescription.doctor.phone|default:'Not provided' }}</div>
+                    
+                    <div class="info-label">License No:</div>
+                    <div class="info-value">MD-{{ prescription.doctor.id|default:"000000" }}</div>
+                </div>
+            </div>
+            
+            <div class="info-column">
+                <div class="patient-info">
+                    <div class="section-title">PATIENT INFORMATION</div>
+                    <div class="info-label">Name:</div>
+                    <div class="info-value">{{ prescription.patient.get_full_name|default:prescription.patient.email }}</div>
+                    
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">{{ prescription.patient.email }}</div>
+                    
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value">{{ prescription.patient.phone|default:'Not provided' }}</div>
+                    
+                    <div class="info-label">Age:</div>
+                    <div class="info-value">{{ prescription.patient.age|default:'Not specified' }}</div>
+                    
+                    <div class="info-label">Patient ID:</div>
+                    <div class="info-value">PT-{{ prescription.patient.id|default:"000000" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnosis -->
+        <div class="diagnosis">
+            <div class="section-title">DIAGNOSIS</div>
+            <p>{{ prescription.diagnosis }}</p>
+        </div>
+
+        <!-- Medications -->
+        <div class="medications">
+            <div class="section-title">PRESCRIBED MEDICATIONS</div>
+            {% for medication in medications %}
+            <div class="medication-item">
+                <div class="medication-name">{{ medication.medicine_name }}</div>
+                <div class="medication-details">
+                    <div><strong>Dosage:</strong> {{ medication.dosage }}</div>
+                    <div><strong>Frequency:</strong> {{ medication.get_frequency_display|default:medication.frequency }}</div>
+                    <div><strong>Duration:</strong> {{ medication.duration }}</div>
+                    <div><strong>Quantity:</strong> {{ medication.quantity }}</div>
+                </div>
+                {% if medication.instructions %}
+                <div class="instructions">
+                    <strong>Instructions:</strong> {{ medication.instructions }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Additional Instructions -->
+        {% if prescription.notes %}
+        <div class="instructions">
+            <div class="section-title">DOCTOR'S NOTES</div>
+            <p>{{ prescription.notes }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Follow-up Information -->
+        {% if prescription.follow_up_date %}
+        <div style="background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%); border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div class="section-title">FOLLOW-UP APPOINTMENT</div>
+            <p><strong>Date:</strong> {{ prescription.follow_up_date|date:"F d, Y" }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Doctor's Signature</div>
+                <div style="margin-top: 5px; font-size: 11px; color: #7f8c8d;">Dr. {{ prescription.doctor.get_full_name|default:prescription.doctor.email }}</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Patient's Signature</div>
+                <div style="margin-top: 5px; font-size: 11px; color: #7f8c8d;">{{ prescription.patient.get_full_name|default:prescription.patient.email }}</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p class="warning">IMPORTANT: Take medications exactly as prescribed. Complete the full course of treatment.</p>
+            <p>This prescription is valid only when issued by a licensed medical practitioner.</p>
+            <p>SmartCare Healthcare System | {{ prescription.created_at|date:"Y" }} | All rights reserved</p>
+        </div>
+    </div>
+</body>
+</html>

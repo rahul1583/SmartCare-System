@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Medical Records - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Medical Records</h2>
+                <p class="text-gray-600">View and manage medical records</p>
+            </div>
+            {% if user.is_doctor or user.is_admin %}
+            <a href="{% url 'medical_records:create_medical_record' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i>Add Record
+            </a>
+            {% endif %}
+        </div>
+        
+        {% if medical_records %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            {% if user.is_admin or user.is_doctor %}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                            {% endif %}
+                            {% if user.is_admin or user.is_patient %}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                            {% endif %}
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chief Complaint</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assessment</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for record in medical_records %}
+                        <tr class="hover:bg-gray-50">
+                            {% if user.is_admin or user.is_doctor %}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ record.patient.get_full_name|default:record.patient.email }}</div>
+                            </td>
+                            {% endif %}
+                            {% if user.is_admin or user.is_patient %}
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">Dr. {{ record.doctor.get_full_name|default:record.doctor.email }}</div>
+                            </td>
+                            {% endif %}
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900 max-w-xs truncate">{{ record.chief_complaint }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900 max-w-xs truncate">{{ record.assessment }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ record.created_at|date:"M d, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <a href="{% url 'medical_records:medical_record_detail' record_id=record.pk %}" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-eye mr-1"></i>View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-12 bg-gray-50 rounded-lg">
+                <i class="fas fa-notes-medical text-gray-400 text-5xl mb-4"></i>
+                <p class="text-gray-600 text-lg">No medical records found.</p>
+                {% if user.is_doctor or user.is_admin %}
+                <a href="{% url 'medical_records:create_medical_record' %}" class="inline-block mt-4 text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-plus mr-2"></i>Add your first record
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <!-- Quick links to other sections -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <h3 class="text-sm font-medium text-gray-500 mb-2">Related</h3>
+            <div class="flex flex-wrap gap-4">
+                <a href="{% url 'medical_records:lab_report_list' %}" class="text-blue-600 hover:text-blue-800"><i class="fas fa-flask mr-1"></i>Lab Reports</a>
+                <a href="{% url 'medical_records:vital_signs_list' %}" class="text-blue-600 hover:text-blue-800"><i class="fas fa-heartbeat mr-1"></i>Vital Signs</a>
+                <a href="{% url 'medical_records:allergy_list' %}" class="text-blue-600 hover:text-blue-800"><i class="fas fa-allergies mr-1"></i>Allergies</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

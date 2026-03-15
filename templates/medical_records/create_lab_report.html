@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Lab Report - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-lg">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-t-xl px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-flask text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Create Lab Report</h1>
+                            <p class="text-purple-100">Order new laboratory test for patient</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'medical_records:lab_report_list' %}" class="text-white hover:text-purple-200 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Reports
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Form Content -->
+            <div class="p-8">
+                <form method="post" class="space-y-6" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Patient & Doctor Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-injured mr-2 text-purple-600"></i>Patient *
+                            </label>
+                            <select name="patient" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="">Select Patient</option>
+                                {% for patient in patients %}
+                                <option value="{{ patient.id }}">{{ patient.get_full_name|default:patient.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        {% if user.is_admin %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-md mr-2 text-purple-600"></i>Doctor *
+                            </label>
+                            <select name="doctor" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                                <option value="">Select Doctor</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name|default:doctor.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.is_doctor %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-md mr-2 text-purple-600"></i>Doctor
+                            </label>
+                            <input type="text" value="Dr. {{ user.get_full_name|default:user.email }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                            <input type="hidden" name="doctor" value="{{ user.id }}">
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Report Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-vial mr-2 text-purple-600"></i>Report Type *
+                        </label>
+                        <select name="report_type" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <option value="">Select Report Type</option>
+                            <option value="blood_test">Blood Test</option>
+                            <option value="urine_test">Urine Test</option>
+                            <option value="x_ray">X-Ray</option>
+                            <option value="ultrasound">Ultrasound</option>
+                            <option value="ct_scan">CT Scan</option>
+                            <option value="mri">MRI</option>
+                            <option value="ecg">ECG</option>
+                            <option value="pathology">Pathology</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Title -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-purple-600"></i>Report Title *
+                        </label>
+                        <input type="text" name="title" required placeholder="e.g., Complete Blood Count, Chest X-Ray, etc." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-file-medical mr-2 text-purple-600"></i>Description
+                        </label>
+                        <textarea name="description" rows="3" placeholder="Describe the purpose of this lab test..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"></textarea>
+                    </div>
+                    
+                    <!-- Initial Results -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-clipboard-check mr-2 text-purple-600"></i>Initial Results (Optional)
+                        </label>
+                        <textarea name="results" rows="4" placeholder="Initial test results if available..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"></textarea>
+                    </div>
+                    
+                    <!-- Normal Range -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-chart-line mr-2 text-purple-600"></i>Normal Range (Optional)
+                        </label>
+                        <textarea name="normal_range" rows="3" placeholder="Normal reference ranges for this test..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"></textarea>
+                    </div>
+                    
+                    <!-- Interpretation -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-stethoscope mr-2 text-purple-600"></i>Interpretation (Optional)
+                        </label>
+                        <textarea name="interpretation" rows="3" placeholder="Preliminary interpretation of results..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"></textarea>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-info-circle mr-2 text-purple-600"></i>Status
+                        </label>
+                        <select name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Report File Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-file-upload mr-2 text-purple-600"></i>Report File (Optional)
+                        </label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition-colors">
+                            <div class="space-y-2">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                                <div class="text-sm text-gray-600">
+                                    <label for="report_file" class="cursor-pointer text-purple-600 hover:text-purple-700">
+                                        <span>Click to upload</span>
+                                        <input type="file" id="report_file" name="report_file" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                    </label>
+                                    or drag and drop
+                                </div>
+                                <p class="text-xs text-gray-500">PDF, JPG, PNG, DOC up to 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <a href="{% url 'medical_records:lab_report_list' %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200">
+                            <i class="fas fa-save mr-2"></i>Create Lab Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

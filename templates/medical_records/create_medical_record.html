@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Medical Record - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-lg">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-t-xl px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-file-medical text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Create Medical Record</h1>
+                            <p class="text-blue-100">Create new patient medical record</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'medical_records:medical_record_list' %}" class="text-white hover:text-blue-200 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Records
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Form Content -->
+            <div class="p-8">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Patient & Doctor Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-injured mr-2 text-blue-600"></i>Patient *
+                            </label>
+                            <select name="patient" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Patient</option>
+                                {% for patient in patients %}
+                                <option value="{{ patient.id }}">{{ patient.get_full_name|default:patient.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        {% if user.is_admin %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-md mr-2 text-blue-600"></i>Doctor *
+                            </label>
+                            <select name="doctor" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Doctor</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name|default:doctor.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.is_doctor %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-md mr-2 text-blue-600"></i>Doctor
+                            </label>
+                            <input type="text" value="Dr. {{ user.get_full_name|default:user.email }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                            <input type="hidden" name="doctor" value="{{ user.id }}">
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Appointment Link (Optional) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-calendar-check mr-2 text-blue-600"></i>Link to Appointment (Optional)
+                        </label>
+                        <select name="appointment" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">No specific appointment</option>
+                            {% for appointment in appointments %}
+                            <option value="{{ appointment.id }}">{{ appointment.patient.get_full_name|default:appointment.patient.email }} - {{ appointment.appointment_date|date:"M d, Y" }} {{ appointment.appointment_time|time:"g:i A" }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Chief Complaint -->
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                            <i class="fas fa-stethoscope mr-2 text-blue-600"></i>Chief Complaint
+                        </h3>
+                        <textarea name="chief_complaint" required rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Describe the patient's main reason for visit..."></textarea>
+                    </div>
+                    
+                    <!-- Medical History -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                            <i class="fas fa-history mr-2 text-blue-600"></i>Medical History
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <!-- History of Present Illness -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-notes-medical mr-2 text-blue-500"></i>History of Present Illness
+                                </label>
+                                <textarea name="history_of_present_illness" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Detailed description of current illness..."></textarea>
+                            </div>
+                            
+                            <!-- Past Medical History -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-clock mr-2 text-blue-500"></i>Past Medical History
+                                </label>
+                                <textarea name="past_medical_history" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Previous medical conditions, surgeries, hospitalizations..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Physical Examination -->
+                    <div class="bg-green-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                            <i class="fas fa-user-check mr-2 text-green-600"></i>Physical Examination
+                        </h3>
+                        <textarea name="physical_examination" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Physical examination findings..."></textarea>
+                    </div>
+                    
+                    <!-- Assessment & Plan -->
+                    <div class="bg-purple-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                            <i class="fas fa-diagnoses mr-2 text-purple-600"></i>Assessment & Plan
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <!-- Assessment -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-brain mr-2 text-purple-500"></i>Assessment
+                                </label>
+                                <textarea name="assessment" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Diagnosis and clinical assessment..."></textarea>
+                            </div>
+                            
+                            <!-- Plan -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-clipboard-list mr-2 text-purple-500"></i>Treatment Plan
+                                </label>
+                                <textarea name="plan" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Treatment plan, medications, follow-up..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Confidentiality -->
+                    <div class="bg-red-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                            <i class="fas fa-lock mr-2 text-red-600"></i>Privacy & Confidentiality
+                        </h3>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="is_confidential" name="is_confidential" class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                            <label for="is_confidential" class="ml-2 block text-sm text-gray-700">
+                                Mark this medical record as confidential (restricted access)
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Confidential records will have restricted access and additional privacy protections.</p>
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <a href="{% url 'medical_records:medical_record_list' %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all duration-200">
+                            <i class="fas fa-save mr-2"></i>Create Medical Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

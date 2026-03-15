@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Medical Record Detail - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Medical Record Details</h1>
+                    <p class="text-gray-600 mt-2">View comprehensive medical record information</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{% url 'medical_records:medical_record_list' %}" 
+                       class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Records
+                    </a>
+                    {% if user.is_doctor or user.is_admin %}
+                        <a href="{% url 'medical_records:update_medical_record' medical_record.id %}" 
+                           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-edit mr-2"></i>Edit Record
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Record Content -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Patient & Doctor Info -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+                <div class="flex items-center justify-between text-white">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-file-medical text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">Medical Record #{{ medical_record.id }}</h2>
+                            <p class="text-blue-100">Created on {{ medical_record.created_at|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/20">
+                            {% if medical_record.is_confidential %}
+                                <i class="fas fa-lock mr-1"></i>Confidential
+                            {% else %}
+                                <i class="fas fa-unlock mr-1"></i>Standard
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8">
+                <!-- Patient and Doctor Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-user-injured mr-2 text-blue-600"></i>Patient Information
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Name:</span>
+                                <span class="font-medium text-gray-800">{{ medical_record.patient.get_full_name }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Email:</span>
+                                <span class="font-medium text-gray-800">{{ medical_record.patient.email }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Phone:</span>
+                                <span class="font-medium text-gray-800">{{ medical_record.patient.phone|default:'Not provided' }}</span>
+                            </div>
+                            {% if medical_record.appointment %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Appointment:</span>
+                                <span class="font-medium text-gray-800">#{{ medical_record.appointment.id }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-user-md mr-2 text-green-600"></i>Doctor Information
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Name:</span>
+                                <span class="font-medium text-gray-800">Dr. {{ medical_record.doctor.get_full_name }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Email:</span>
+                                <span class="font-medium text-gray-800">{{ medical_record.doctor.email }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Phone:</span>
+                                <span class="font-medium text-gray-800">{{ medical_record.doctor.phone|default:'Not provided' }}</span>
+                            </div>
+                            {% if medical_record.doctor.doctor_profile %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Specialization:</span>
+                                <span class="font-medium text-gray-800">{{ medical_record.doctor.doctor_profile.specialization|default:'General Practice' }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Information -->
+                <div class="space-y-6">
+                    <!-- Chief Complaint -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-stethoscope mr-2 text-red-600"></i>Chief Complaint
+                        </h3>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <p class="text-gray-700">{{ medical_record.chief_complaint|default:'No chief complaint recorded' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- History of Present Illness -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-history mr-2 text-orange-600"></i>History of Present Illness
+                        </h3>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <p class="text-gray-700">{{ medical_record.history_of_present_illness|default:'No history recorded' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Past Medical History -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-notes-medical mr-2 text-purple-600"></i>Past Medical History
+                        </h3>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <p class="text-gray-700">{{ medical_record.past_medical_history|default:'No past medical history recorded' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Physical Examination -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-heartbeat mr-2 text-pink-600"></i>Physical Examination
+                        </h3>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <p class="text-gray-700">{{ medical_record.physical_examination|default:'No physical examination recorded' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Assessment -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-diagnoses mr-3 text-indigo-600"></i>Assessment
+                        </h3>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <p class="text-gray-700">{{ medical_record.assessment|default:'No assessment recorded' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Plan -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-clipboard-list mr-2 text-teal-600"></i>Treatment Plan
+                        </h3>
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <p class="text-gray-700">{{ medical_record.plan|default:'No treatment plan recorded' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Vital Signs (if available) -->
+                    {% if medical_record.vital_signs.exists %}
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-heart-pulse mr-2 text-red-600"></i>Vital Signs
+                        </h3>
+                        <div class="bg-white rounded-lg overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Pressure</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Heart Rate</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temperature</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for vital in medical_record.vital_signs.all %}
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ vital.recorded_at|date:"F d, Y g:i A" }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ vital.blood_pressure_systolic }}/{{ vital.blood_pressure_diastolic }} mmHg
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ vital.heart_rate }} bpm
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ vital.temperature }}°C
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="{% url 'medical_records:vital_signs_detail' vital.id %}" 
+                                                   class="text-blue-600 hover:text-blue-900">View Details</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Lab Reports (if available) -->
+                    {% if medical_record.lab_reports.exists %}
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-microscope mr-2 text-green-600"></i>Lab Reports
+                        </h3>
+                        <div class="bg-white rounded-lg overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ordered Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for report in medical_record.lab_reports.all %}
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ report.get_report_type_display }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ report.title }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                    {% if report.status == 'completed' %}bg-green-100 text-green-800
+                                                    {% elif report.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                    {{ report.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ report.ordered_date|date:"F d, Y" }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="{% url 'medical_records:lab_report_detail' report.id %}" 
+                                                   class="text-blue-600 hover:text-blue-900">View Details</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Footer Information -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                        <div>
+                            <span class="font-medium">Created:</span> {{ medical_record.created_at|date:"F d, Y g:i A" }}
+                        </div>
+                        <div>
+                            <span class="font-medium">Last Updated:</span> {{ medical_record.updated_at|date:"F d, Y g:i A" }}
+                        </div>
+                        <div>
+                            <span class="font-medium">Record ID:</span> #{{ medical_record.id }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

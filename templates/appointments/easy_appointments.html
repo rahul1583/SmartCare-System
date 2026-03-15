@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Easy Appointments - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-center">
+                <i class="fas fa-calendar-check text-blue-600 text-3xl mb-2"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Easy Appointments</h2>
+                <p class="text-gray-600">Quick and easy appointment scheduling</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{% url 'appointments:appointment_list' %}" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-list mr-2"></i>My Appointments
+                </a>
+            </div>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                <i class="fas fa-calendar-day text-blue-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-blue-800">{{ today_appointments|default:0 }}</div>
+                <div class="text-sm text-blue-600">Today's Appointments</div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4 text-center">
+                <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-green-800">{{ upcoming_appointments|default:0 }}</div>
+                <div class="text-sm text-green-600">Upcoming</div>
+            </div>
+            <div class="bg-yellow-50 rounded-lg p-4 text-center">
+                <i class="fas fa-clock text-yellow-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-yellow-800">{{ pending_appointments|default:0 }}</div>
+                <div class="text-sm text-yellow-600">Pending</div>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-4 text-center">
+                <i class="fas fa-user-md text-purple-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-purple-800">{{ available_doctors|default:0 }}</div>
+                <div class="text-sm text-purple-600">Available Doctors</div>
+            </div>
+        </div>
+        
+        <!-- Quick Booking Form (Hidden by default) -->
+        <div id="quickBookingForm" class="hidden mb-6 bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                <i class="fas fa-calendar-plus mr-2"></i>Comprehensive Appointment Booking
+            </h3>
+            <form method="post" action="{% url 'appointments:book_appointment' %}">
+                {% csrf_token %}
+                
+                <!-- Patient Information Section -->
+                <div class="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                    <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-user-injured mr-2 text-blue-600"></i>Patient Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Full Name *</label>
+                            <input type="text" name="patient_name" required 
+                                   value="{{ user.get_full_name|default:user.username }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   placeholder="Enter your full name">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Age *</label>
+                            <input type="number" name="age" required min="1" max="120"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   placeholder="Enter your age">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Gender *</label>
+                            <select name="gender" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">Select gender...</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Blood Group *</label>
+                            <select name="blood_group" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">Select blood group...</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number *</label>
+                            <input type="tel" name="phone" required 
+                                   pattern="[0-9]{10}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   placeholder="10-digit mobile number">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Email *</label>
+                            <input type="email" name="email" required 
+                                   value="{{ user.email }}" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   placeholder="your@email.com">
+                        </div>
+                        <div class="lg:col-span-3">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Address *</label>
+                            <textarea name="address" rows="2" required 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                      placeholder="Enter your complete address"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointment Details Section -->
+                <div class="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                    <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-calendar-check mr-2 text-green-600"></i>Appointment Details
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Select Doctor *</label>
+                            <select name="doctor" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">Choose a doctor...</option>
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.id }}">
+                                        Dr. {{ doctor.get_full_name|default:doctor.email }} 
+                                        {% if doctor.doctor_profile %}- {{ doctor.doctor_profile.specialization|default:'General Practice' }}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Preferred Date & Time *</label>
+                            <input type="datetime-local" name="date_time" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Appointment Type</label>
+                            <select name="appointment_type" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">Select type...</option>
+                                <option value="consultation">General Consultation</option>
+                                <option value="followup">Follow-up Visit</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="checkup">Routine Check-up</option>
+                                <option value="specialist">Specialist Consultation</option>
+                                <option value="vaccination">Vaccination</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Visit Priority</label>
+                            <select name="priority" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                <option value="">Select priority...</option>
+                                <option value="low">Low - Routine check-up</option>
+                                <option value="medium">Medium - Non-urgent medical issue</option>
+                                <option value="high">High - Urgent but not emergency</option>
+                                <option value="critical">Critical - Emergency</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Reason for Visit *</label>
+                            <textarea name="reason" rows="3" required 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                      placeholder="Describe the reason for your visit in detail..."></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Symptoms Description</label>
+                            <textarea name="symptoms" rows="2" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                      placeholder="Describe your symptoms in detail (when they started, severity, frequency)..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end space-x-3">
+                    <button type="button" onclick="hideBookingForm()" 
+                            class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-check mr-2"></i>Book Appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Today's Schedule -->
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                <i class="fas fa-clock mr-2"></i>Today's Schedule
+            </h3>
+            {% if today_appointments_list %}
+                <div class="space-y-3">
+                    {% for appointment in today_appointments_list %}
+                        <div class="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-user-md text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.email }}</div>
+                                    <div class="text-sm text-gray-600">{{ appointment.date_time|date:"F d, Y" }} at {{ appointment.date_time|time:"g:i A" }}</div>
+                                    <div class="text-sm text-gray-500">{{ appointment.reason|truncatechars:50 }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                    {% if appointment.status == 'confirmed' %}bg-green-100 text-green-800
+                                    {% elif appointment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ appointment.status|title }}
+                                </span>
+                                <a href="{% url 'appointments:appointment_detail' appointment.id %}" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8 bg-gray-50 rounded-lg">
+                    <i class="fas fa-calendar-times text-gray-400 text-3xl mb-2"></i>
+                    <p class="text-gray-600">No appointments scheduled for today</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Book Button Section -->
+        <div class="mt-8 text-center">
+            <button onclick="showBookingForm()" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-colors font-semibold shadow-lg">
+                <i class="fas fa-plus mr-2"></i>Quick Book Appointment
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentDate = new Date();
+let appointments = [];
+
+// Initialize appointments data
+document.addEventListener('DOMContentLoaded', function() {
+    // Calendar removed - only showing booking form and today's schedule
+});
+
+function showBookingForm() {
+    document.getElementById('quickBookingForm').classList.remove('hidden');
+}
+
+function hideBookingForm() {
+    document.getElementById('quickBookingForm').classList.add('hidden');
+}
+</script>
+{% endblock %}

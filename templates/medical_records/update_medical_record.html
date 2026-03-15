@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Medical Record - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Update Medical Record</h1>
+                    <p class="text-gray-600 mt-2">Edit medical record information for {{ medical_record.patient.get_full_name }}</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{% url 'medical_records:medical_record_detail' medical_record.id %}" 
+                       class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Record
+                    </a>
+                    <a href="{% url 'medical_records:medical_record_list' %}" 
+                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-list mr-2"></i>All Records
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Form -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+                <div class="flex items-center text-white">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-edit text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">Medical Record #{{ medical_record.id }}</h2>
+                        <p class="text-blue-100">Last updated: {{ medical_record.updated_at|date:"F d, Y g:i A" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8">
+                {% if messages %}
+                    <div class="mb-6">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} bg-{{ message.tags }}-50 border border-{{ message.tags }}-200 text-{{ message.tags }}-800 px-4 py-3 rounded-lg" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Patient and Doctor Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                                <i class="fas fa-user-injured mr-2 text-blue-600"></i>Patient Information
+                            </h3>
+                            <div class="space-y-2">
+                                <p><strong>Name:</strong> {{ medical_record.patient.get_full_name }}</p>
+                                <p><strong>Email:</strong> {{ medical_record.patient.email }}</p>
+                                <p><strong>Phone:</strong> {{ medical_record.patient.phone|default:'Not provided' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                                <i class="fas fa-user-md mr-2 text-green-600"></i>Doctor Information
+                            </h3>
+                            <div class="space-y-2">
+                                <p><strong>Name:</strong> Dr. {{ medical_record.doctor.get_full_name }}</p>
+                                <p><strong>Email:</strong> {{ medical_record.doctor.email }}</p>
+                                <p><strong>Specialization:</strong> {{ medical_record.doctor.doctor_profile.specialization|default:'General Practice' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chief Complaint -->
+                    <div>
+                        <label for="chief_complaint" class="block text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-stethoscope mr-2 text-red-600"></i>Chief Complaint
+                        </label>
+                        <textarea name="chief_complaint" id="chief_complaint" rows="3" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Describe the patient's primary reason for visit...">{{ medical_record.chief_complaint }}</textarea>
+                    </div>
+
+                    <!-- History of Present Illness -->
+                    <div>
+                        <label for="history_of_present_illness" class="block text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-history mr-2 text-orange-600"></i>History of Present Illness
+                        </label>
+                        <textarea name="history_of_present_illness" id="history_of_present_illness" rows="4" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Describe the current illness history...">{{ medical_record.history_of_present_illness }}</textarea>
+                    </div>
+
+                    <!-- Past Medical History -->
+                    <div>
+                        <label for="past_medical_history" class="block text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-notes-medical mr-2 text-purple-600"></i>Past Medical History
+                        </label>
+                        <textarea name="past_medical_history" id="past_medical_history" rows="4"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Describe relevant past medical conditions...">{{ medical_record.past_medical_history }}</textarea>
+                    </div>
+
+                    <!-- Physical Examination -->
+                    <div>
+                        <label for="physical_examination" class="block text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-heartbeat mr-2 text-pink-600"></i>Physical Examination
+                        </label>
+                        <textarea name="physical_examination" id="physical_examination" rows="4"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Describe physical examination findings...">{{ medical_record.physical_examination }}</textarea>
+                    </div>
+
+                    <!-- Assessment -->
+                    <div>
+                        <label for="assessment" class="block text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-diagnoses mr-2 text-indigo-600"></i>Assessment
+                        </label>
+                        <textarea name="assessment" id="assessment" rows="4"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Provide your medical assessment...">{{ medical_record.assessment }}</textarea>
+                    </div>
+
+                    <!-- Plan -->
+                    <div>
+                        <label for="plan" class="block text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-clipboard-list mr-2 text-teal-600"></i>Treatment Plan
+                        </label>
+                        <textarea name="plan" id="plan" rows="4"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Describe the treatment plan...">{{ medical_record.plan }}</textarea>
+                    </div>
+
+                    <!-- Confidentiality -->
+                    <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+                        <div class="flex items-center">
+                            <input type="checkbox" name="is_confidential" id="is_confidential" 
+                                   class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                   {% if medical_record.is_conficial %}checked{% endif %}>
+                            <label for="is_confidential" class="ml-3 text-lg font-medium text-gray-800">
+                                <i class="fas fa-lock mr-2 text-yellow-600"></i>Mark as Confidential
+                            </label>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Confidential records will have restricted access and additional security measures.
+                        </p>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            All fields except "Past Medical History", "Physical Examination", "Assessment", and "Plan" are required.
+                        </div>
+                        <div class="flex space-x-4">
+                            <a href="{% url 'medical_records:medical_record_detail' medical_record.id %}" 
+                               class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-save mr-2"></i>Update Record
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mt-8 bg-blue-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-info-circle mr-2 text-blue-600"></i>Update Guidelines
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium text-gray-800 mb-2">Medical Documentation Standards:</h4>
+                    <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <li>Use clear and concise medical terminology</li>
+                        <li>Include relevant dates and timelines</li>
+                        <li>Document all significant findings</li>
+                        <li>Ensure patient confidentiality</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-800 mb-2">Important Notes:</h4>
+                    <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <li>Updates are logged with timestamp</li>
+                        <li>Previous versions are archived</li>
+                        <li>Confidential records require special access</li>
+                        <li>Always save changes before leaving</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-save functionality (optional enhancement)
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const textareas = form.querySelectorAll('textarea');
+    
+    // Save to localStorage on input
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            localStorage.setItem(`medical_record_${textarea.id}`, textarea.value);
+        });
+        
+        // Restore from localStorage on load
+        const savedValue = localStorage.getItem(`medical_record_${textarea.id}`);
+        if (savedValue && !textarea.value) {
+            textarea.value = savedValue;
+        }
+    });
+    
+    // Clear localStorage on successful submit
+    form.addEventListener('submit', function() {
+        textareas.forEach(textarea => {
+            localStorage.removeItem(`medical_record_${textarea.id}`);
+        });
+    });
+});
+</script>
+{% endblock %}

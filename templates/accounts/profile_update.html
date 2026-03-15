@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Profile - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-6">
+            <i class="fas fa-user-edit text-blue-600 text-3xl mb-2"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Complete Your Profile</h2>
+            <p class="text-gray-600">Update your information and profile photo</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Profile Photo -->
+            <div class="mb-6 text-center">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Profile" class="w-24 h-24 rounded-full object-cover mx-auto mb-3 border-4 border-blue-100">
+                {% else %}
+                    <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3 text-blue-600 text-2xl font-bold">
+                        {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}
+                    </div>
+                {% endif %}
+                <label class="block text-gray-700 text-sm font-bold mb-2">Profile Photo</label>
+                {{ user_form.avatar }}
+                {% if user_form.avatar.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ user_form.avatar.errors.0 }}</p>
+                {% endif %}
+                <p class="text-xs text-gray-500 mt-1">Choose an image (JPG, PNG). Max 2MB.</p>
+            </div>
+
+            <!-- User Form (name, phone) -->
+            <div class="mb-6 border-b border-gray-200 pb-6">
+                <h3 class="text-sm font-semibold text-gray-600 uppercase mb-3">Basic Information</h3>
+                {% for field in user_form %}
+                    {% if field.name != 'avatar' %}
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
+                            {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Role-specific Profile Form -->
+            {% if profile_form %}
+            <div class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-600 uppercase mb-3">{% if user.is_patient %}Patient{% else %}Doctor{% endif %} Details</h3>
+                {% for field in profile_form %}
+                <div class="mb-4">
+                    <label for="{{ field.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
+                        {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="mb-6">
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-save mr-2"></i>Save Profile
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="number"],
+    input[type="file"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    textarea {
+        resize: vertical;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Bills - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-center">
+                <i class="fas fa-file-invoice-dollar text-blue-600 text-3xl mb-2"></i>
+                <h2 class="text-2xl font-bold text-gray-800">My Bills</h2>
+                <p class="text-gray-600">View and manage your billing information</p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{% url 'accounts:patient_dashboard' %}" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                <i class="fas fa-file-invoice text-blue-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-blue-800">{{ total_bills }}</div>
+                <div class="text-sm text-blue-600">Total Bills</div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4 text-center">
+                <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-green-800">{{ paid_bills }}</div>
+                <div class="text-sm text-green-600">Paid Bills</div>
+            </div>
+            <div class="bg-yellow-50 rounded-lg p-4 text-center">
+                <i class="fas fa-clock text-yellow-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-yellow-800">{{ pending_bills }}</div>
+                <div class="text-sm text-yellow-600">Pending Bills</div>
+            </div>
+            <div class="bg-red-50 rounded-lg p-4 text-center">
+                <i class="fas fa-rupee-sign text-red-600 text-2xl mb-2"></i>
+                <div class="text-2xl font-bold text-red-800">Rs. {{ total_amount|default:"0" }}</div>
+                <div class="text-sm text-red-600">Total Amount</div>
+            </div>
+        </div>
+        
+        <!-- Bills List -->
+        {% if bills %}
+            <div class="space-y-4">
+                {% for bill in bills %}
+                    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                        <!-- Bill Header -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-blue-100 rounded-full p-2">
+                                        <i class="fas fa-file-invoice text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">Bill #{{ bill.id }}</h3>
+                                        <p class="text-sm text-gray-600">{{ bill.created_at|date:"F d, Y g:i A" }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold text-gray-900">Rs. {{ bill.total_amount }}</p>
+                                        <span class="px-3 py-1 text-sm font-semibold rounded-full 
+                                            {% if bill.status == 'paid' %}bg-green-100 text-green-800
+                                            {% elif bill.status == 'sent' %}bg-yellow-100 text-yellow-800
+                                            {% elif bill.status == 'overdue' %}bg-red-100 text-red-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ bill.status|title }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bill Details -->
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Doctor & Appointment Info -->
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-500 mb-1">Doctor</h4>
+                                        <p class="text-gray-900 font-medium">Dr. {{ bill.doctor.get_full_name|default:bill.doctor.email }}</p>
+                                        {% if bill.doctor.doctor_profile.specialization %}
+                                            <p class="text-sm text-gray-600">{{ bill.doctor.doctor_profile.specialization }}</p>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if bill.appointment %}
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-500 mb-1">Appointment</h4>
+                                        <p class="text-gray-900">{{ bill.appointment.date_time|date:"F d, Y g:i A" }}</p>
+                                        <p class="text-sm text-gray-600">{{ bill.appointment.reason|truncatechars:50 }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Bill Breakdown -->
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-500 mb-2">Bill Details</h4>
+                                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Consultation Fee:</span>
+                                                <span class="font-medium">Rs. {{ bill.consultation_fee|default:0 }}</span>
+                                            </div>
+                                            {% if bill.medicine_fee %}
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Medicine Fee:</span>
+                                                <span class="font-medium">Rs. {{ bill.medicine_fee }}</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if bill.lab_fee %}
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Lab Tests:</span>
+                                                <span class="font-medium">Rs. {{ bill.lab_fee }}</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if bill.other_fee %}
+                                            <div class="flex justify-between">
+                                                <span class="text-gray-600">Other Charges:</span>
+                                                <span class="font-medium">Rs. {{ bill.other_fee }}</span>
+                                            </div>
+                                            {% endif %}
+                                            <div class="border-t pt-2 flex justify-between font-semibold">
+                                                <span>Total Amount:</span>
+                                                <span>Rs. {{ bill.total_amount }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="mt-6 flex justify-end space-x-3">
+                                {% if request.user.is_patient and bill.status != 'paid' %}
+                                    <a href="{% url 'billing:payment' bill.id %}" 
+                                       class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
+                                        <i class="fas fa-credit-card mr-2"></i>Pay Now
+                                    </a>
+                                {% endif %}
+                                {% if bill.status == 'paid' %}
+                                    <a href="#" onclick="window.print()" 
+                                       class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center">
+                                        <i class="fas fa-print mr-2"></i>Print Receipt
+                                    </a>
+                                {% endif %}
+                                {% if request.user.is_patient %}
+                                    <a href="{% url 'billing:payment_history' %}" 
+                                       class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                                        <i class="fas fa-history mr-2"></i>Payment History
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <i class="fas fa-file-invoice text-gray-400 text-5xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Bills Found</h3>
+                <p class="text-gray-500 mb-6">
+                    You don't have any bills yet. Bills will be created after your appointments are completed.
+                </p>
+                <a href="{% url 'appointments:appointment_list' %}" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-calendar-alt mr-2"></i>View Appointments
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="text-center mb-12">
+    <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to SmartCare System</h1>
+    <p class="text-xl text-gray-600 mb-8">Your Complete Healthcare Management Solution</p>
+</div>
+
+<!-- Features Section -->
+<div class="grid md:grid-cols-3 gap-8 mb-12">
+    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <div class="text-blue-600 mb-4">
+            <i class="fas fa-calendar-check text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Easy Appointments</h3>
+        <p class="text-gray-600">Book appointments with doctors online and manage your schedule efficiently.</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <div class="text-green-600 mb-4">
+            <i class="fas fa-prescription text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Digital Prescriptions</h3>
+        <p class="text-gray-600">Access your prescriptions anytime, anywhere with our secure digital system.</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <div class="text-purple-600 mb-4">
+            <i class="fas fa-credit-card text-4xl"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Online Payments</h3>
+        <p class="text-gray-600">Pay your bills securely online with multiple payment options.</p>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="bg-blue-600 text-white rounded-lg p-8 text-center">
+    <h2 class="text-2xl font-bold mb-4">Get Started Today</h2>
+    <p class="mb-6">Join thousands of patients and doctors using SmartCare System</p>
+    
+    {% if user.is_authenticated %}
+        <a href="{% url 'accounts:dashboard' %}" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">
+            Go to Dashboard
+        </a>
+    {% else %}
+        <div class="space-x-4">
+            <a href="{% url 'accounts:register' %}" class="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 inline-block">
+                Register Now
+            </a>
+            <a href="{% url 'accounts:login' %}" class="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 inline-block">
+                Login
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Statistics -->
+<div class="grid md:grid-cols-4 gap-4 mt-12">
+    <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="text-3xl font-bold text-blue-600 mb-2">1000+</div>
+        <div class="text-gray-600">Happy Patients</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="text-3xl font-bold text-green-600 mb-2">50+</div>
+        <div class="text-gray-600">Expert Doctors</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="text-3xl font-bold text-purple-600 mb-2">5000+</div>
+        <div class="text-gray-600">Appointments</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="text-3xl font-bold text-orange-600 mb-2">24/7</div>
+        <div class="text-gray-600">Support</div>
+    </div>
+</div>
+{% endblock %}

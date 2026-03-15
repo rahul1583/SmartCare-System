@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Allergies - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl shadow-lg p-8 mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">Patient Allergies</h1>
+                    <p class="text-yellow-100">Manage patient allergy information and reactions</p>
+                </div>
+                {% if user.is_doctor or user.is_admin %}
+                <a href="{% url 'medical_records:add_allergy' %}" 
+                   class="bg-white text-yellow-600 px-6 py-3 rounded-lg font-medium hover:bg-yellow-50 transition-colors flex items-center">
+                    <i class="fas fa-plus mr-2"></i>Add Allergy
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Allergies List -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            {% if allergies %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Allergen Details
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Patient & Doctor
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Severity & Reaction
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Recorded Date
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for allergy in allergies %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                                    <i class="fas fa-allergies text-yellow-600"></i>
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ allergy.allergen }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {% if allergy.allergy_type %}
+                                                        {{ allergy.get_allergy_type_display }}
+                                                    {% else %}
+                                                        Unknown Type
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ allergy.patient.get_full_name|default:allergy.patient.email }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            Dr. {{ allergy.doctor.get_full_name|default:allergy.doctor.email }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center">
+                                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                                    {% if allergy.severity == 'mild' %}bg-yellow-100 text-yellow-800
+                                                    {% elif allergy.severity == 'moderate' %}bg-orange-100 text-orange-800
+                                                    {% elif allergy.severity == 'severe' %}bg-red-100 text-red-800
+                                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                    {{ allergy.get_severity_display|title }}
+                                                </span>
+                                            </div>
+                                            <div class="text-sm text-gray-900">
+                                                <span class="font-medium">Reaction:</span> {{ allergy.reaction|truncatechars:50 }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ allergy.recorded_at|date:"M d, Y" }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            {{ allergy.recorded_at|time:"g:i A" }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <a href="#" class="text-yellow-600 hover:text-yellow-900">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if user.is_doctor or user.is_admin %}
+                                            <a href="#" class="text-orange-600 hover:text-orange-900">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-allergies text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Allergies Recorded</h3>
+                    <p class="text-gray-600 mb-6">
+                        {% if user.is_doctor or user.is_admin %}
+                            No allergies have been recorded yet. Start by adding your first allergy record.
+                        {% else %}
+                            You don't have any allergy records yet.
+                        {% endif %}
+                    </p>
+                    {% if user.is_doctor or user.is_admin %}
+                        <a href="{% url 'medical_records:add_allergy' %}" 
+                           class="inline-flex items-center px-6 py-3 bg-yellow-600 text-white font-medium rounded-lg hover:bg-yellow-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Add Allergy
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Statistics -->
+        {% if allergies %}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <i class="fas fa-allergies text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-600">Total Allergies</p>
+                        <p class="text-2xl font-bold text-gray-800">{{ allergies|length }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-red-100 text-red-600">
+                        <i class="fas fa-exclamation text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-600">Severe</p>
+                        <p class="text-2xl font-bold text-gray-800">
+                            {% with count=0 %}{% for allergy in allergies %}{% if allergy.severity == 'severe' %}{% if forloop.first %}{{ forloop.counter0|add:1 }}{% endif %}{% endif %}{% endfor %}{% endwith %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-orange-100 text-orange-600">
+                        <i class="fas fa-exclamation-circle text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-600">Moderate</p>
+                        <p class="text-2xl font-bold text-gray-800">
+                            {% with count=0 %}{% for allergy in allergies %}{% if allergy.severity == 'moderate' %}{% if forloop.first %}{{ forloop.counter0|add:1 }}{% endif %}{% endif %}{% endfor %}{% endwith %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                        <i class="fas fa-exclamation-triangle text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-600">Mild</p>
+                        <p class="text-2xl font-bold text-gray-800">
+                            {% with count=0 %}{% for allergy in allergies %}{% if allergy.severity == 'mild' %}{% if forloop.first %}{{ forloop.counter0|add:1 }}{% endif %}{% endif %}{% endfor %}{% endwith %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

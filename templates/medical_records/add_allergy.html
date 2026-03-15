@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Allergy - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-lg">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-t-xl px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-allergies text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Add Patient Allergy</h1>
+                            <p class="text-yellow-100">Record new allergy information for patient</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'medical_records:allergy_list' %}" class="text-white hover:text-yellow-200 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Allergies
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Form Content -->
+            <div class="p-8">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Patient & Doctor Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-injured mr-2 text-orange-600"></i>Patient *
+                            </label>
+                            <select name="patient" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                <option value="">Select Patient</option>
+                                {% for patient in patients %}
+                                <option value="{{ patient.id }}">{{ patient.get_full_name|default:patient.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        {% if user.is_admin %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-md mr-2 text-orange-600"></i>Doctor *
+                            </label>
+                            <select name="doctor" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                <option value="">Select Doctor</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}">Dr. {{ doctor.get_full_name|default:doctor.email }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.is_doctor %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user-md mr-2 text-orange-600"></i>Doctor
+                            </label>
+                            <input type="text" value="Dr. {{ user.get_full_name|default:user.email }}" readonly class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                            <input type="hidden" name="doctor" value="{{ user.id }}">
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Allergy Information -->
+                    <div class="bg-orange-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                            <i class="fas fa-allergies mr-2 text-orange-600"></i>Allergy Details
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <!-- Allergen -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-exclamation-triangle mr-2 text-orange-500"></i>Allergen/Substance *
+                                </label>
+                                <input type="text" name="allergen" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" placeholder="e.g., Penicillin, Peanuts, Latex, Dust mites">
+                                <p class="text-xs text-gray-500 mt-1">Enter the specific substance causing the allergic reaction</p>
+                            </div>
+                            
+                            <!-- Allergy Type -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-tag mr-2 text-orange-500"></i>Allergy Type
+                                </label>
+                                <select name="allergy_type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                    <option value="">Select Type</option>
+                                    <option value="food">Food Allergy</option>
+                                    <option value="drug">Drug Allergy</option>
+                                    <option value="environmental">Environmental Allergy</option>
+                                    <option value="insect">Insect Allergy</option>
+                                    <option value="contact">Contact Dermatitis</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Severity -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-exclamation-circle mr-2 text-orange-500"></i>Severity *
+                                </label>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <label class="relative">
+                                        <input type="radio" name="severity" value="mild" required class="sr-only peer">
+                                        <div class="px-4 py-3 border-2 border-gray-200 rounded-lg cursor-pointer text-center peer-checked:border-yellow-500 peer-checked:bg-yellow-50 hover:border-yellow-300 transition-colors">
+                                            <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                                            <span class="font-medium">Mild</span>
+                                        </div>
+                                    </label>
+                                    <label class="relative">
+                                        <input type="radio" name="severity" value="moderate" required class="sr-only peer">
+                                        <div class="px-4 py-3 border-2 border-gray-200 rounded-lg cursor-pointer text-center peer-checked:border-orange-500 peer-checked:bg-orange-50 hover:border-orange-300 transition-colors">
+                                            <i class="fas fa-exclamation-circle text-orange-600 mr-2"></i>
+                                            <span class="font-medium">Moderate</span>
+                                        </div>
+                                    </label>
+                                    <label class="relative">
+                                        <input type="radio" name="severity" value="severe" required class="sr-only peer">
+                                        <div class="px-4 py-3 border-2 border-gray-200 rounded-lg cursor-pointer text-center peer-checked:border-red-500 peer-checked:bg-red-50 hover:border-red-300 transition-colors">
+                                            <i class="fas fa-exclamation text-red-600 mr-2"></i>
+                                            <span class="font-medium">Severe</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Reaction -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-stethoscope mr-2 text-orange-500"></i>Reaction Symptoms *
+                                </label>
+                                <textarea name="reaction" required rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" placeholder="Describe the allergic reaction symptoms..."></textarea>
+                                <p class="text-xs text-gray-500 mt-1">e.g., Hives, swelling, difficulty breathing, rash, anaphylaxis</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Clinical Information -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">
+                            <i class="fas fa-notes-medical mr-2 text-orange-600"></i>Clinical Information
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <!-- Onset Date -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar-alt mr-2 text-orange-500"></i>Onset Date
+                                </label>
+                                <input type="date" name="onset_date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                <p class="text-xs text-gray-500 mt-1">When the allergy was first identified</p>
+                            </div>
+                            
+                            <!-- Treatment -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-pills mr-2 text-orange-500"></i>Treatment/Management
+                                </label>
+                                <textarea name="treatment" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" placeholder="Current treatment plan or management strategies..."></textarea>
+                                <p class="text-xs text-gray-500 mt-1">e.g., Antihistamines, EpiPen, Avoidance strategies</p>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-sticky-note mr-2 text-orange-500"></i>Clinical Notes
+                                </label>
+                                <textarea name="notes" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" placeholder="Additional clinical observations, patient history, or relevant notes..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-info-circle mr-2 text-orange-600"></i>Status
+                        </label>
+                        <select name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="active">Active</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <a href="{% url 'medical_records:allergy_list' %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg hover:from-yellow-700 hover:to-orange-700 transition-all duration-200">
+                            <i class="fas fa-save mr-2"></i>Save Allergy
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

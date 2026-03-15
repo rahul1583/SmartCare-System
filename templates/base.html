@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartCare System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'home' %}" class="flex items-center">
+                        <i class="fas fa-heartbeat text-blue-600 text-2xl mr-2"></i>
+                        <span class="font-bold text-xl text-gray-800">SmartCare</span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-gray-600">Welcome, {{ user.get_full_name|default:user.username }}</span>
+                        <a href="{% url 'accounts:dashboard' %}" class="text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-dashboard mr-1"></i>Dashboard
+                        </a>
+                        <a href="{% url 'accounts:profile' %}" class="text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-user mr-1"></i>Profile
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="text-gray-700 hover:text-blue-600">
+                            <i class="fas fa-sign-in-alt mr-1"></i>Login
+                        </a>
+                        <a href="{% url 'accounts:register' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            <i class="fas fa-user-plus mr-1"></i>Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 mt-4">
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% elif message.tags == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-blue-100 border-blue-400 text-blue-700{% endif %} border px-4 py-3 rounded mb-4" role="alert">
+                    <span class="block sm:inline">{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Professional Footer -->
+    <footer class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white mt-12">
+        <!-- Main Footer Content -->
+        <div class="max-w-6xl mx-auto px-6 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Company Info -->
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-heartbeat text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-xl text-white">SmartCare</span>
+                            <p class="text-xs text-blue-300">Healthcare System</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Comprehensive healthcare management platform connecting patients with quality medical care and innovative health solutions.
+                    </p>
+                    <div class="flex space-x-3">
+                        <a href="#" class="w-8 h-8 bg-blue-800/50 rounded-lg flex items-center justify-center text-gray-300 hover:bg-blue-600 hover:text-white transition-all">
+                            <i class="fab fa-facebook-f text-sm"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 bg-blue-800/50 rounded-lg flex items-center justify-center text-gray-300 hover:bg-blue-400 hover:text-white transition-all">
+                            <i class="fab fa-twitter text-sm"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 bg-blue-800/50 rounded-lg flex items-center justify-center text-gray-300 hover:bg-pink-500 hover:text-white transition-all">
+                            <i class="fab fa-instagram text-sm"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 bg-blue-800/50 rounded-lg flex items-center justify-center text-gray-300 hover:bg-blue-700 hover:text-white transition-all">
+                            <i class="fab fa-linkedin-in text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links & Services -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <h3 class="text-base font-semibold text-white mb-3 flex items-center">
+                            <i class="fas fa-link text-blue-400 mr-2 text-sm"></i>
+                            Quick Links
+                        </h3>
+                        <ul class="space-y-2">
+                            <li><a href="{% url 'home' %}" class="text-gray-300 hover:text-blue-400 transition-colors text-sm">Home</a></li>
+                            <li><a href="{% url 'appointments:easy_appointments' %}" class="text-gray-300 hover:text-blue-400 transition-colors text-sm">Book Appointment</a></li>
+                            <li><a href="{% url 'accounts:dashboard' %}" class="text-gray-300 hover:text-blue-400 transition-colors text-sm">Dashboard</a></li>
+                            <li><a href="{% url 'prescriptions:list' %}" class="text-gray-300 hover:text-blue-400 transition-colors text-sm">Prescriptions</a></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-3">
+                        <h3 class="text-base font-semibold text-white mb-3 flex items-center">
+                            <i class="fas fa-stethoscope text-blue-400 mr-2 text-sm"></i>
+                            Services
+                        </h3>
+                        <ul class="space-y-2">
+                            <li class="text-gray-300 text-sm">General Consultation</li>
+                            <li class="text-gray-300 text-sm">Emergency Care</li>
+                            <li class="text-gray-300 text-sm">Specialist Services</li>
+                            <li class="text-gray-300 text-sm">Health Records</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="space-y-4">
+                    <h3 class="text-base font-semibold text-white mb-3 flex items-center">
+                        <i class="fas fa-hospital text-blue-400 mr-2 text-sm"></i>
+                        Contact Information
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start text-gray-300 text-sm">
+                            <i class="fas fa-map-marker-alt mr-3 text-blue-400 mt-1"></i>
+                            <span>123 Healthcare Street<br>Medical City, MC 12345</span>
+                        </div>
+                        <div class="flex items-center text-gray-300 text-sm">
+                            <i class="fas fa-phone mr-3 text-blue-400"></i>
+                            <span>+1 (555) 123-4567</span>
+                        </div>
+                        <div class="flex items-center text-gray-300 text-sm">
+                            <i class="fas fa-envelope mr-3 text-blue-400"></i>
+                            <span>support@smartcare.com</span>
+                        </div>
+                        <div class="flex items-center text-gray-300 text-sm">
+                            <i class="fas fa-clock mr-3 text-blue-400"></i>
+                            <span>24/7 Emergency Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Footer -->
+        <div class="border-t border-blue-800/50">
+            <div class="max-w-6xl mx-auto px-6 py-6">
+                <div class="flex flex-col md:flex-row justify-center items-center">
+                    <div class="text-gray-400 text-sm text-center">
+                        <p>&copy; 2024 SmartCare System. All rights reserved.</p>
+                        <p class="text-xs mt-1 text-blue-300">Advanced Healthcare Management Platform</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-hide messages after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.display = 'none';
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

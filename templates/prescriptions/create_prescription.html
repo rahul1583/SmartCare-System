@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Prescription - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl shadow-xl p-8 mb-8 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <div class="flex items-center mb-3">
+                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-prescription text-3xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold">Create Prescription</h1>
+                            <p class="text-purple-100">Write a new prescription for your patient</p>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'prescriptions:list' %}" 
+                   class="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Prescriptions
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="mb-8 space-y-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-xl flex items-center {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                        <div class="flex-shrink-0 mr-3">
+                            {% if message.tags == 'success' %}
+                                <i class="fas fa-check-circle text-xl"></i>
+                            {% elif message.tags == 'error' %}
+                                <i class="fas fa-exclamation-circle text-xl"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle text-xl"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium">{{ message }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Create Prescription Form -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-8 py-6">
+                <div class="flex items-center text-white">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-file-medical text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">New Prescription Details</h2>
+                        <p class="text-purple-100">Fill in the prescription information below</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-8">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label for="patient" class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-user mr-2 text-purple-600"></i>Patient <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <select name="patient" id="patient" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors">
+                                <option value="">Select a patient...</option>
+                                {% if patients %}
+                                    {% for patient in patients %}
+                                        <option value="{{ patient.id }}">{{ patient.get_full_name|default:patient.email }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="" disabled>No patients available</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-user-md mr-2 text-purple-600"></i>Consultation Type <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <div class="flex flex-col sm:flex-row gap-4 p-4 rounded-lg border border-gray-300 bg-gray-50">
+                                <label class="flex items-center cursor-pointer flex-1 p-3 rounded-lg border-2 border-purple-500 bg-purple-50">
+                                    <input type="radio" name="consultation_type" value="physical_visit" checked class="mr-3 text-purple-600 focus:ring-purple-500">
+                                    <div>
+                                        <span class="font-medium text-gray-900 block">Physical Visit</span>
+                                        <span class="text-gray-500 text-sm">Patient visited in person</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center cursor-pointer flex-1 p-3 rounded-lg border-2 border-gray-200 hover:border-purple-300 hover:bg-purple-50/50 transition-colors">
+                                    <input type="radio" name="consultation_type" value="online_consultant" class="mr-3 text-purple-600 focus:ring-purple-500">
+                                    <div>
+                                        <span class="font-medium text-gray-900 block">Online Consultant</span>
+                                        <span class="text-gray-500 text-sm">Remote/video consultation</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="appointment" class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-calendar-check mr-2 text-purple-600"></i>Appointment <span class="text-gray-500 text-xs font-normal ml-2">(Optional)</span>
+                            </label>
+                            <select name="appointment" id="appointment" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors">
+                                <option value="">Select an appointment...</option>
+                                {% if appointments %}
+                                    {% for appointment in appointments %}
+                                        <option value="{{ appointment.id }}">
+                                            {% if appointment.patient_name %}
+                                                {{ appointment.patient_name }}
+                                            {% elif appointment.patient.get_full_name %}
+                                                {{ appointment.patient.get_full_name }}
+                                            {% else %}
+                                                {{ appointment.patient.username }}
+                                            {% endif %} - 
+                                            {{ appointment.date_time|date:"F d, Y" }} at {{ appointment.date_time|time:"g:i A" }}
+                                            {% if appointment.status %}({{ appointment.get_status_display }}){% endif %}
+                                            - Dr. {{ appointment.doctor.get_full_name|default:appointment.doctor.email }}
+                                        </option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="" disabled>No appointments available</option>
+                                {% endif %}
+                            </select>
+                            <!-- Debug info -->
+                            <div class="mt-2 text-xs text-gray-500">
+                                Debug: Found {{ appointments|length }} appointments (without prescriptions)
+                                {% if appointments %}
+                                    - Latest: 
+                                    {% if appointments.0.patient_name %}
+                                        {{ appointments.0.patient_name }}
+                                    {% elif appointments.0.patient.get_full_name %}
+                                        {{ appointments.0.patient.get_full_name }}
+                                    {% else %}
+                                        {{ appointments.0.patient.username }}
+                                    {% endif %}
+                                    with Dr. {{ appointments.0.doctor.get_full_name|default:appointments.0.doctor.email }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="diagnosis" class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-stethoscope mr-2 text-purple-600"></i>Diagnosis <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <textarea name="diagnosis" id="diagnosis" rows="4" required 
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+                                      placeholder="Enter the diagnosis..."></textarea>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="medicines" class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-pills mr-2 text-purple-600"></i>Medicines <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <textarea name="medicines" id="medicines" rows="6" required 
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+                                      placeholder="List prescribed medicines with dosage and frequency...&#10;Example:&#10;1. Paracetamol 500mg - 1 tablet twice daily after meals&#10;2. Amoxicillin 250mg - 1 capsule three times daily&#10;3. Vitamin C 500mg - 1 tablet daily"></textarea>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="instructions" class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-clipboard-list mr-2 text-purple-600"></i>Instructions <span class="text-gray-500 text-xs font-normal ml-2">(Optional)</span>
+                            </label>
+                            <textarea name="instructions" id="instructions" rows="4" 
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors resize-none"
+                                      placeholder="Additional instructions for the patient..."></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="validity_days" class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-calendar-alt mr-2 text-purple-600"></i>Validity Period <span class="text-gray-500 text-xs font-normal ml-2">(in days)</span>
+                            </label>
+                            <input type="number" name="validity_days" id="validity_days" min="1" max="365" value="30"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors">
+                        </div>
+                        
+                        <div>
+                            <label for="follow_up_date" class="block text-gray-700 text-sm font-bold mb-3 flex items-center">
+                                <i class="fas fa-calendar-check mr-2 text-purple-600"></i>Follow-up Date <span class="text-gray-500 text-xs font-normal ml-2">(Optional)</span>
+                            </label>
+                            <input type="date" name="follow_up_date" id="follow_up_date"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Medical Guidelines -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-blue-900 mb-2">Prescription Guidelines</h3>
+                    <div class="text-blue-800">
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-1 flex-shrink-0"></i>
+                                <span>Ensure all medicines are appropriate for the patient's condition</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-1 flex-shrink-0"></i>
+                                <span>Include clear dosage instructions and frequency</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-1 flex-shrink-0"></i>
+                                <span>Check for potential drug interactions and allergies</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-1 flex-shrink-0"></i>
+                                <span>Set appropriate follow-up dates for monitoring</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-center space-x-6">
+            <button type="submit" 
+                    class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center font-semibold">
+                <i class="fas fa-save mr-3"></i>Create Prescription
+            </button>
+            <a href="{% url 'prescriptions:list' %}" 
+               class="bg-gray-600 text-white px-8 py-4 rounded-xl hover:bg-gray-700 transition-all duration-300 hover:shadow-lg flex items-center font-semibold">
+                <i class="fas fa-times mr-3"></i>Cancel
+            </a>
+        </div>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

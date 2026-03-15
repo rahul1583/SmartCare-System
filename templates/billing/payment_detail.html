@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    /* Remove any browser-specific currency formatting */
+    .amount-display {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Payment Details - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-center">
+                <i class="fas fa-receipt text-green-600 text-3xl mb-2"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Payment Details</h2>
+            </div>
+            <a href="{% url 'billing:payment_history' %}" class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Payment History
+            </a>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Payment Status Card -->
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Payment Status</h3>
+                    <div class="flex items-center">
+                        <span class="px-4 py-2 text-lg font-semibold rounded-full 
+                            {% if payment.status == 'completed' %}bg-green-100 text-green-800
+                            {% elif payment.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% elif payment.status == 'failed' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {% if payment.status == 'completed' %}
+                                <i class="fas fa-check-circle mr-2"></i>Payment Completed
+                            {% elif payment.status == 'pending' %}
+                                <i class="fas fa-clock mr-2"></i>Payment Pending
+                            {% elif payment.status == 'failed' %}
+                                <i class="fas fa-times-circle mr-2"></i>Payment Failed
+                            {% else %}
+                                <i class="fas fa-question-circle mr-2"></i>{{ payment.status|title }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold text-green-600 amount-display">Rs. {{ payment.amount }}</div>
+                    <div class="text-sm text-gray-600">Payment Amount</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transaction Information -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                <i class="fas fa-info-circle mr-2"></i>Transaction Information
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="font-medium text-gray-600">Transaction ID:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.transaction_id|default:"N/A" }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Payment Date:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.created_at|date:"F d, Y" }} at {{ payment.created_at|time:"g:i A" }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Payment Method:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.get_payment_method_display|default:payment.payment_method|title }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Gateway:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.gateway|default:"N/A"|title }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bill Information -->
+        <div class="bg-blue-50 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                <i class="fas fa-file-invoice-dollar mr-2"></i>Bill Information
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="font-medium text-gray-600">Bill ID:</span>
+                    <span class="text-gray-800 ml-2">#{{ payment.bill.id }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Bill Amount:</span>
+                    <span class="text-gray-800 ml-2 amount-display">Rs. {{ payment.bill.total_amount }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Doctor:</span>
+                    <span class="text-gray-800 ml-2">Dr. {{ payment.bill.doctor.get_full_name|default:payment.bill.doctor.email }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Patient:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.bill.patient.get_full_name|default:payment.bill.patient.email }}</span>
+                </div>
+                {% if payment.bill.appointment %}
+                    <div>
+                        <span class="font-medium text-gray-600">Appointment Date:</span>
+                        <span class="text-gray-800 ml-2">{{ payment.bill.appointment.date_time|date:"F d, Y" }}</span>
+                    </div>
+                {% endif %}
+                {% if payment.bill.prescription %}
+                    <div>
+                        <span class="font-medium text-gray-600">Prescription ID:</span>
+                        <span class="text-gray-800 ml-2">#{{ payment.bill.prescription.id }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Cost Breakdown -->
+        {% if payment.bill %}
+            <div class="bg-yellow-50 rounded-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                    <i class="fas fa-calculator mr-2"></i>Bill Cost Breakdown
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span class="text-gray-600">Consultation Fee:</span>
+                        <span class="font-semibold text-gray-800">Rs. {{ payment.bill.consultation_fee }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span class="text-gray-600">Medicine Fee:</span>
+                        <span class="font-semibold text-gray-800">Rs. {{ payment.bill.medicine_fee }}</span>
+                    </div>
+                    {% if payment.bill.lab_fee %}
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                            <span class="text-gray-600">Lab Fee:</span>
+                            <span class="font-semibold text-gray-800">Rs. {{ payment.bill.lab_fee }}</span>
+                        </div>
+                    {% endif %}
+                    {% if payment.bill.other_fee %}
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                            <span class="text-gray-600">Other Fee:</span>
+                            <span class="font-semibold text-gray-800">Rs. {{ payment.bill.other_fee }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="flex justify-between items-center py-3 bg-green-100 px-4 rounded-lg">
+                        <span class="text-lg font-bold text-gray-800">Total Bill Amount:</span>
+                        <span class="text-lg font-bold text-green-600 amount-display">Rs. {{ payment.bill.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-center space-x-4">
+            {% if payment.status == 'pending' %}
+                <a href="{% url 'billing:payment' payment.bill.id %}" 
+                   class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors">
+                    <i class="fas fa-credit-card mr-2"></i>Retry Payment
+                </a>
+            {% endif %}
+            <button onclick="window.print()" 
+                    class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
+                <i class="fas fa-print mr-2"></i>Print Receipt
+            </button>
+            <a href="{% url 'billing:bill_detail' payment.bill.id %}" 
+               class="bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition-colors">
+                <i class="fas fa-file-invoice mr-2"></i>View Bill
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Ensure all amounts show Rs. format
+document.addEventListener('DOMContentLoaded', function() {
+    const amountElements = document.querySelectorAll('.amount-display');
+    amountElements.forEach(element => {
+        const currentText = element.textContent;
+        // Remove any $ symbols and ensure Rs. prefix
+        const cleanText = currentText.replace(/^\$/, 'Rs. ').replace(/^Rs\.\s*\$/, 'Rs. 0');
+        element.textContent = cleanText;
+    });
+});
+</script>
+{% endblock %}
