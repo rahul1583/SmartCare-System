@@ -522,6 +522,40 @@ def admin_dashboard_users_view(request):
     return render(request, 'accounts/admin_dashboard_users.html', {'users': users})
 
 @login_required
+def user_details_view(request, user_id):
+    """View detailed information about a specific user"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied!')
+        return redirect('accounts:dashboard')
+    
+    try:
+        user = get_object_or_404(User, id=user_id)
+        
+        # Get additional context data
+        context = {
+            'user': user,
+        }
+        
+        # Add role-specific statistics
+        if user.role == 'doctor':
+            context['doctor_appointments'] = user.doctor_appointments.all() if hasattr(user, 'doctor_appointments') else []
+            context['doctor_prescriptions'] = user.doctor_prescriptions.all() if hasattr(user, 'doctor_prescriptions') else []
+        elif user.role == 'patient':
+            context['patient_appointments'] = user.patient_appointments.all() if hasattr(user, 'patient_appointments') else []
+            context['patient_prescriptions'] = user.patient_prescriptions.all() if hasattr(user, 'patient_prescriptions') else []
+            context['bills'] = user.bills.all() if hasattr(user, 'bills') else []
+        
+        return render(request, 'accounts/user_details.html', context)
+        
+    except Exception as e:
+        import traceback
+        error_message = f'Error retrieving user details: {str(e)}'
+        print(f"DEBUG: {error_message}")
+        print(f"DEBUG: Traceback: {traceback.format_exc()}")
+        messages.error(request, error_message)
+        return redirect('accounts:admin_dashboard_users')
+
+@login_required
 def toggle_user_status(request, user_id):
     if not request.user.is_admin:
         return JsonResponse({'error': 'Access denied'}, status=403)

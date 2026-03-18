@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     path('admin/add-user/', views.admin_add_user_view, name='admin_add_user'),
     path('admin/users/', views.admin_users_view, name='admin_users'),
+    path('admin/users/<int:user_id>/details/', views.user_details_view, name='user_details'),
     path('admin/dashboard-users/', views.admin_dashboard_users_view, name='admin_dashboard_users'),
     path('admin/users/<int:user_id>/toggle/', views.toggle_user_status, name='toggle_user_status'),
     path('admin/users/<int:user_id>/delete/', views.delete_user, name='delete_user'),

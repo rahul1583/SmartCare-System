@@ -1,0 +1,463 @@
+{% extends 'base.html' %}
+
+{% block title %}User Details - Admin{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-lg mb-6">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-xl px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">User Details</h1>
+                            <p class="text-blue-100">Comprehensive user information</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="window.close()" class="text-white hover:text-blue-200 transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Information -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="p-8">
+                <!-- Profile Header -->
+                <div class="flex items-center mb-8 pb-8 border-b border-gray-200">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-6">
+                        <span class="text-2xl font-bold text-white">
+                            {{ user.get_full_name|default:user.email|slice:":2"|upper }}
+                        </span>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold text-gray-900">
+                            {{ user.get_full_name|default:user.email }}
+                        </h2>
+                        <p class="text-gray-600">{{ user.email }}</p>
+                        <div class="flex items-center mt-2 space-x-3">
+                            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full
+                                {% if user.role == 'admin' %}bg-purple-100 text-purple-800
+                                {% elif user.role == 'doctor' %}bg-blue-100 text-blue-800
+                                {% elif user.role == 'patient' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800
+                                {% endif %}">
+                                {{ user.get_role_display }}
+                            </span>
+                            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full
+                                {% if user.is_active %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800
+                                {% endif %}">
+                                {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Personal Information -->
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-user-circle mr-2 text-blue-600"></i>
+                                Personal Information
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Full Name:</span>
+                                    <span class="font-medium text-gray-900">{{ user.get_full_name|default:'Not provided' }}</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Email:</span>
+                                    <span class="font-medium text-gray-900">{{ user.email }}</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Phone:</span>
+                                    <span class="font-medium text-gray-900">{{ user.phone|default:'Not provided' }}</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Address:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.address %}
+                                            {{ user.address }}
+                                        {% else %}
+                                            Not provided
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2">
+                                    <span class="text-gray-600">Date Joined:</span>
+                                    <span class="font-medium text-gray-900">{{ user.date_joined|date:"F d, Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Status -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-shield-alt mr-2 text-green-600"></i>
+                                Account Status
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span class="font-medium
+                                        {% if user.is_active %}text-green-600{% else %}text-red-600{% endif %}">
+                                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Last Login:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.last_login %}
+                                            {{ user.last_login|date:"F d, Y g:i A" }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Account Age:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% now "Y-m-d" as today %}
+                                        {{ user.date_joined|timesince }} ago
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2">
+                                    <span class="text-gray-600">Email Verified:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.email_verified %}Yes{% else %}No{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Information -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-cog mr-2 text-purple-600"></i>
+                                System Information
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">User ID:</span>
+                                    <span class="font-medium text-gray-900">#{{ user.id }}</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Username:</span>
+                                    <span class="font-medium text-gray-900">{{ user.username }}</span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">User Role:</span>
+                                    <span class="font-medium text-gray-900">{{ user.get_role_display }}</span>
+                                </div>
+                                <div class="flex justify-between py-2">
+                                    <span class="text-gray-600">Staff Status:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.is_staff %}Staff{% else %}Regular User{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role-Specific Information -->
+                    <div class="space-y-6">
+                        {% if user.role == 'doctor' %}
+                            <!-- Doctor Information -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-stethoscope mr-2 text-purple-600"></i>
+                                    Doctor Information
+                                </h3>
+                                <div class="space-y-3">
+                                    {% if user.doctor_profile %}
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Specialization:</span>
+                                            <span class="font-medium text-gray-900">{{ user.doctor_profile.specialization|default:'Not specified' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Experience:</span>
+                                            <span class="font-medium text-gray-900">{{ user.doctor_profile.experience|default:'0' }} years</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Consultation Fee:</span>
+                                            <span class="font-medium text-gray-900">Rs. {{ user.doctor_profile.consultation_fee|default:'0' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">License Number:</span>
+                                            <span class="font-medium text-gray-900">{{ user.doctor_profile.license_number|default:'Not provided' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Education:</span>
+                                            <span class="font-medium text-gray-900">{{ user.doctor_profile.education|default:'Not provided' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Hospital/Clinic:</span>
+                                            <span class="font-medium text-gray-900">{{ user.doctor_profile.hospital|default:'Not provided' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2">
+                                            <span class="text-gray-600">Available Days:</span>
+                                            <span class="font-medium text-gray-900">{{ user.doctor_profile.available_days|default:'Not specified' }}</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4 text-gray-500">
+                                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                                            <p>Doctor profile not completed</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% elif user.role == 'patient' %}
+                            <!-- Patient Information -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-heartbeat mr-2 text-red-600"></i>
+                                    Patient Information
+                                </h3>
+                                <div class="space-y-3">
+                                    {% if user.patient_profile %}
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Date of Birth:</span>
+                                            <span class="font-medium text-gray-900">{{ user.patient_profile.date_of_birth|date:"F d, Y"|default:'Not provided' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Age:</span>
+                                            <span class="font-medium text-gray-900">
+                                                {% if user.patient_profile.date_of_birth %}
+                                                    {% now "Y" as current_year %}
+                                                    {{ current_year|add:"-1"|add:user.patient_profile.date_of_birth.year }} years
+                                                {% else %}
+                                                    Not specified
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Gender:</span>
+                                            <span class="font-medium text-gray-900">{{ user.patient_profile.get_gender_display|default:'Not specified' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Blood Group:</span>
+                                            <span class="font-medium text-gray-900">{{ user.patient_profile.blood_group|default:'Not provided' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Emergency Contact:</span>
+                                            <span class="font-medium text-gray-900">{{ user.patient_profile.emergency_contact|default:'Not provided' }}</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-600">Medical History:</span>
+                                            <span class="font-medium text-gray-900">
+                                                {% if user.patient_profile.medical_history %}
+                                                    {{ user.patient_profile.medical_history|truncatechars:50 }}
+                                                {% else %}
+                                                    Not provided
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between py-2">
+                                            <span class="text-gray-600">Allergies:</span>
+                                            <span class="font-medium text-gray-900">{{ user.patient_profile.allergies|default:'None specified' }}</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-4 text-gray-500">
+                                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                                            <p>Patient profile not completed</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <!-- Admin Information -->
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-user-shield mr-2 text-indigo-600"></i>
+                                    Administrator Information
+                                </h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between py-2 border-b border-gray-100">
+                                        <span class="text-gray-600">Access Level:</span>
+                                        <span class="font-medium text-gray-900">Full System Access</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-gray-100">
+                                        <span class="text-gray-600">Permissions:</span>
+                                        <span class="font-medium text-gray-900">All Administrative Functions</span>
+                                    </div>
+                                    <div class="flex justify-between py-2 border-b border-gray-100">
+                                        <span class="text-gray-600">System Role:</span>
+                                        <span class="font-medium text-gray-900">Super Administrator</span>
+                                    </div>
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-gray-600">Department:</span>
+                                        <span class="font-medium text-gray-900">System Administration</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Activity Statistics -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-chart-line mr-2 text-orange-600"></i>
+                                Activity Statistics
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Total Appointments:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.role == 'doctor' %}
+                                            {{ user.doctor_appointments.count|default:'0' }}
+                                        {% elif user.role == 'patient' %}
+                                            {{ user.patient_appointments.count|default:'0' }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Total Prescriptions:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.role == 'doctor' %}
+                                            {{ user.doctor_prescriptions.count|default:'0' }}
+                                        {% elif user.role == 'patient' %}
+                                            {{ user.patient_prescriptions.count|default:'0' }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Total Bills:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.role == 'patient' %}
+                                            {{ user.bills.count|default:'0' }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Medical Records:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.role == 'doctor' %}
+                                            {{ user.medical_records_as_doctor.count|default:'0' }}
+                                        {% elif user.role == 'patient' %}
+                                            {{ user.medical_records_as_patient.count|default:'0' }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2">
+                                    <span class="text-gray-600">Lab Reports:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.role == 'patient' %}
+                                            {{ user.lab_reports.count|default:'0' }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i class="fas fa-history mr-2 text-teal-600"></i>
+                                Recent Activity
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Last Activity:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.last_login %}
+                                            {{ user.last_login|date:"F d, Y g:i A" }}
+                                        {% else %}
+                                            Never
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2 border-b border-gray-100">
+                                    <span class="text-gray-600">Profile Updated:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.profile_updated_at %}
+                                            {{ user.profile_updated_at|date:"F d, Y" }}
+                                        {% else %}
+                                            Not updated
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between py-2">
+                                    <span class="text-gray-600">Account Status:</span>
+                                    <span class="font-medium text-gray-900">
+                                        {% if user.is_active and user.last_login %}
+                                            Active User
+                                        {% elif user.is_active %}
+                                            New User
+                                        {% else %}
+                                            Inactive
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            User ID: #{{ user.id }} | Last updated: {{ user.updated_at|date:"F d, Y g:i A" }}
+                        </div>
+                        <div class="flex space-x-3">
+                            <button onclick="window.print()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-print mr-2"></i>Print
+                            </button>
+                            {% if user.role == 'doctor' %}
+                                <a href="{% url 'appointments:doctor_appointments' user.id %}" 
+                                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-calendar mr-2"></i>Appointments
+                                </a>
+                                <a href="{% url 'prescriptions:doctor_prescriptions' user.id %}" 
+                                   class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-prescription mr-2"></i>Prescriptions
+                                </a>
+                            {% elif user.role == 'patient' %}
+                                <a href="{% url 'appointments:patient_appointments' user.id %}" 
+                                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-calendar mr-2"></i>Appointments
+                                </a>
+                                <a href="{% url 'prescriptions:patient_prescriptions' user.id %}" 
+                                   class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-prescription mr-2"></i>Prescriptions
+                                </a>
+                                <a href="{% url 'billing:patient_bills' user.id %}" 
+                                   class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+                                    <i class="fas fa-file-invoice mr-2"></i>Bills
+                                </a>
+                                <a href="{% url 'medical_records:patient_medical_records' user.id %}" 
+                                   class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                    <i class="fas fa-file-medical mr-2"></i>Medical Records
+                                </a>
+                            {% endif %}
+                            <button onclick="window.close()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-times mr-2"></i>Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

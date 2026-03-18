@@ -187,6 +187,15 @@
                                class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-center block">
                                 <i class="fas fa-times mr-2"></i>Cancel Appointment
                             </a>
+                        {% elif request.user.is_doctor and appointment.status != 'confirmed' and appointment.status != 'completed' and appointment.status != 'cancelled' %}
+                            <a href="{% url 'appointments:update_appointment' appointment.id %}" 
+                               class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-center block">
+                                <i class="fas fa-edit mr-2"></i>Edit Appointment
+                            </a>
+                            <a href="{% url 'appointments:cancel_appointment' appointment.id %}" 
+                               class="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-center block">
+                                <i class="fas fa-times mr-2"></i>Cancel Appointment
+                            </a>
                         {% endif %}
                         
                         {% if appointment.bill %}

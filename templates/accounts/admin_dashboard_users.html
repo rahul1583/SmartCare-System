@@ -86,12 +86,16 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex space-x-2">
+                                            <button onclick="viewUserDetails('{{ user.id }}')" 
+                                                    class="text-green-600 hover:text-green-900 text-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
                                             <button onclick="toggleUserStatus('{{ user.id }}')" 
-                                                    class="text-blue-600 hover:text-blue-900 text-sm">
+                                                    class="text-blue-600 hover:text-blue-900 text-sm" title="Toggle Status">
                                                 <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i>
                                             </button>
                                             <button onclick="confirmDeleteUser('{{ user.id }}', '{{ user.get_full_name|default:user.email }}')" 
-                                                    class="text-red-600 hover:text-red-900 text-sm">
+                                                    class="text-red-600 hover:text-red-900 text-sm" title="Delete User">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -125,6 +129,17 @@
 </div>
 
 <script>
+function viewUserDetails(userId) {
+    try {
+        const url = `{% url 'accounts:user_details' 0 %}`.replace('0', userId);
+        console.log('Opening user details for user ID:', userId, 'URL:', url);
+        window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    } catch (error) {
+        console.error('Error opening user details:', error);
+        alert('Error opening user details. Please check the console for more information.');
+    }
+}
+
 function toggleUserStatus(userId) {
     if (confirm('Are you sure you want to toggle this user\'s status?')) {
         fetch(`/accounts/admin/users/${userId}/toggle/`, {
