@@ -29,6 +29,7 @@ urlpatterns = [
     path('prescriptions/', include('prescriptions.urls')),
     path('billing/', include('billing.urls')),
     path('medical-records/', include('medical_records.urls')),
+    path('notifications/', include('notifications.urls')),
 ]
 
 if settings.DEBUG:

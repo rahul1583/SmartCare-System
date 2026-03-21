@@ -1,0 +1,48 @@
+{% if notifications %}
+    {% for notification in notifications %}
+        <div class="notification-dropdown-item {% if not notification.is_read %}unread{% endif %} p-3 hover:bg-gray-50 border-b cursor-pointer" onclick="viewNotification({{ notification.id }})">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    {% if notification.priority == 'urgent' %}
+                        <span class="text-red-500">🚨</span>
+                    {% elif notification.priority == 'high' %}
+                        <span class="text-orange-500">⚠️</span>
+                    {% elif notification.priority == 'medium' %}
+                        <span class="text-blue-500">ℹ️</span>
+                    {% else %}
+                        <span class="text-gray-500">📢</span>
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-900 truncate">
+                            {% if not notification.is_read %}<strong>{% endif %}{{ notification.title }}{% if not notification.is_read %}</strong>{% endif %}
+                        </p>
+                        {% if not notification.is_read %}
+                            <span class="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm text-gray-500 truncate">{{ notification.message|truncatechars:80 }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ notification.created_at|timesince }} ago</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    
+    <div class="p-3 border-t">
+        <a href="{% url 'notifications:list' %}" class="block w-full text-center text-sm bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+            View All Notifications
+        </a>
+    </div>
+{% else %}
+    <div class="p-6 text-center text-gray-500">
+        <div class="text-4xl mb-2">🔔</div>
+        <p class="text-sm">No new notifications</p>
+    </div>
+{% endif %}
+
+<script>
+function viewNotification(notificationId) {
+    window.location.href = `/notifications/${notificationId}/`;
+}
+</script>

@@ -1,0 +1,107 @@
+<!-- Notification Widget -->
+<div class="relative">
+    <button id="notificationDropdown" class="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
+        <i class="fas fa-bell text-xl"></i>
+        {% if unread_count > 0 %}
+            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+            {% if unread_count > 1 %}
+                <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {{ unread_count }}
+                </span>
+            {% endif %}
+        {% endif %}
+    </button>
+    
+    <!-- Dropdown -->
+    <div id="notificationMenu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+        <div class="p-4 border-b">
+            <h3 class="text-lg font-semibold text-gray-900">Notifications</h3>
+            <p class="text-sm text-gray-500">{{ unread_count }} unread</p>
+        </div>
+        
+        <div id="notificationList" class="max-h-96 overflow-y-auto">
+            <!-- Notifications will be loaded here -->
+            <div class="p-4 text-center text-gray-500">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p class="text-sm mt-2">Loading notifications...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    const notificationMenu = document.getElementById('notificationMenu');
+    const notificationList = document.getElementById('notificationList');
+    
+    // Toggle dropdown
+    notificationDropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notificationMenu.classList.toggle('hidden');
+        
+        // Load notifications if opening
+        if (!notificationMenu.classList.contains('hidden')) {
+            loadNotifications();
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!notificationMenu.contains(e.target) && !notificationDropdown.contains(e.target)) {
+            notificationMenu.classList.add('hidden');
+        }
+    });
+    
+    // Load notifications via AJAX
+    function loadNotifications() {
+        fetch('/notifications/widget/')
+            .then(response => response.text())
+            .then(html => {
+                notificationList.innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                notificationList.innerHTML = `
+                    <div class="p-4 text-center text-red-500">
+                        <p class="text-sm">Error loading notifications</p>
+                    </div>
+                `;
+            });
+    }
+    
+    // Auto-refresh notifications every 30 seconds
+    setInterval(function() {
+        if (!notificationMenu.classList.contains('hidden')) {
+            loadNotifications();
+        }
+        // Also update the unread count badge
+        updateUnreadCount();
+    }, 30000);
+    
+    function updateUnreadCount() {
+        fetch('/notifications/stats/')
+            .then(response => response.json())
+            .then(data => {
+                const badge = notificationDropdown.querySelector('.bg-red-600');
+                const dot = notificationDropdown.querySelector('.bg-red-500');
+                
+                if (data.unread > 0) {
+                    if (dot) dot.style.display = 'block';
+                    if (badge) {
+                        if (data.unread > 1) {
+                            badge.textContent = data.unread;
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                } else {
+                    if (dot) dot.style.display = 'none';
+                    if (badge) badge.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error updating unread count:', error));
+    }
+});
+</script>

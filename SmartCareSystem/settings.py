@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'billing',
     'medical_records',
     'core',
+    'notifications',
 
     # Allauth
     'django.contrib.sites',

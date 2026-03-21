@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - SmartCare System{% endblock %}
+
+{% block extra_css %}
+<style>
+.notification-item {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+.notification-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(2px);
+}
+.notification-item.unread {
+    border-left-color: #007bff;
+    background-color: #f0f8ff;
+}
+.notification-item.urgent {
+    border-left-color: #dc3545;
+}
+.notification-item.high {
+    border-left-color: #fd7e14;
+}
+.notification-item.medium {
+    border-left-color: #ffc107;
+}
+.notification-item.low {
+    border-left-color: #6c757d;
+}
+
+.notification-type-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.priority-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.filter-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.notification-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.notification-item:hover .notification-actions {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .notification-actions {
+        opacity: 1;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">🔔 Notifications</h1>
+                <p class="text-gray-600 mt-2">Stay updated with your healthcare activities</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{% url 'notifications:preferences' %}" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+                    ⚙️ Preferences
+                </a>
+                <button onclick="markAllRead()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    ✓ Mark All Read
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="stats-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ notifications|length }}</p>
+                </div>
+                <div class="text-3xl">📊</div>
+            </div>
+        </div>
+        <div class="stats-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Unread</p>
+                    <p class="text-2xl font-bold text-blue-600">{{ unread_count }}</p>
+                </div>
+                <div class="text-3xl">🔔</div>
+            </div>
+        </div>
+        <div class="stats-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Urgent</p>
+                    <p class="text-2xl font-bold text-red-600">{{ notifications|selectattr:"priority"|selectattr:"priority","equalto":"urgent"|list|length }}</p>
+                </div>
+                <div class="text-3xl">🚨</div>
+            </div>
+        </div>
+        <div class="stats-card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Recent (7 days)</p>
+                    <p class="text-2xl font-bold text-green-600">{{ notifications|selectattr:"created_at"|selectattr:"created_at","gte":week_ago|list|length }}</p>
+                </div>
+                <div class="text-3xl">📅</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h3 class="text-xl font-bold mb-4">🔍 Filter Notifications</h3>
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">Read Status</label>
+                <select name="is_read" class="w-full px-3 py-2 rounded-lg text-gray-800">
+                    <option value="">All</option>
+                    <option value="false" {% if request.GET.is_read == 'false' %}selected{% endif %}>Unread</option>
+                    <option value="true" {% if request.GET.is_read == 'true' %}selected{% endif %}>Read</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">Type</label>
+                <select name="type" class="w-full px-3 py-2 rounded-lg text-gray-800">
+                    <option value="">All Types</option>
+                    {% for type_value, type_label in notification_types %}
+                        <option value="{{ type_value }}" {% if request.GET.type == type_value %}selected{% endif %}>{{ type_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">Priority</label>
+                <select name="priority" class="w-full px-3 py-2 rounded-lg text-gray-800">
+                    <option value="">All Priorities</option>
+                    {% for priority_value, priority_label in priority_levels %}
+                        <option value="{{ priority_value }}" {% if request.GET.priority == priority_value %}selected{% endif %}>{{ priority_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-white text-purple-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="bg-white rounded-lg shadow-lg">
+        {% if notifications %}
+            {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %} {{ notification.priority }} p-6 border-b hover:bg-gray-50">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    {% if not notification.is_read %}<strong>{% endif %}{{ notification.title }}{% if not notification.is_read %}</strong>{% endif %}
+                                </h3>
+                                <span class="notification-type-badge bg-blue-100 text-blue-800">
+                                    {{ notification.get_notification_type_display }}
+                                </span>
+                                <span class="priority-badge priority-{{ notification.priority }}">
+                                    {{ notification.get_priority_display }}
+                                </span>
+                                {% if not notification.is_read %}
+                                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">NEW</span>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="text-gray-600 mb-3">{{ notification.message }}</p>
+                            
+                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                <span>📅 {{ notification.created_at|date:"F d, Y g:i A" }}</span>
+                                {% if notification.sender %}
+                                    <span>👤 From: {{ notification.sender.get_full_name|default:notification.sender.email }}</span>
+                                {% endif %}
+                                {% if notification.read_at %}
+                                    <span>✓ Read: {{ notification.read_at|date:"F d, Y g:i A" }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if notification.action_url and notification.action_text %}
+                                <a href="{{ notification.action_url }}" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                    {{ notification.action_text }}
+                                </a>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="notification-actions flex space-x-2 ml-4">
+                            {% if not notification.is_read %}
+                                <button onclick="markAsRead({{ notification.id }})" class="text-green-600 hover:text-green-800" title="Mark as read">
+                                    ✓
+                                </button>
+                            {% endif %}
+                            <a href="{% url 'notifications:detail' notification.id %}" class="text-blue-600 hover:text-blue-800" title="View details">
+                                👁️
+                            </a>
+                            <button onclick="deleteNotification({{ notification.id }})" class="text-red-600 hover:text-red-800" title="Delete">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">🔔</div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No notifications found</h3>
+                <p class="text-gray-500">You're all caught up! Check back later for new updates.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function markAsRead(notificationId) {
+    fetch(`/notifications/${notificationId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function markAllRead() {
+    if (confirm('Mark all notifications as read?')) {
+        fetch('/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function deleteNotification(notificationId) {
+    if (confirm('Delete this notification?')) {
+        fetch(`/notifications/${notificationId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

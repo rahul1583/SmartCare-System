@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ notification.title }} - SmartCare</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            margin-bottom: 20px;
+        }
+        .logo {
+            color: #007bff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .notification-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        .appointment { background-color: #e3f2fd; color: #1976d2; }
+        .bill { background-color: #fff3e0; color: #f57c00; }
+        .prescription { background-color: #f3e5f5; color: #7b1fa2; }
+        .medical { background-color: #e8f5e8; color: #388e3c; }
+        .system { background-color: #fce4ec; color: #c2185b; }
+        
+        .content {
+            margin-bottom: 25px;
+        }
+        .message {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+        .priority {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .urgent { background-color: #ffebee; color: #c62828; }
+        .high { background-color: #fff8e1; color: #f57f17; }
+        .medium { background-color: #e0f2f1; color: #00796b; }
+        .low { background-color: #f3e5f5; color: #7b1fa2; }
+        
+        .action-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏥 SmartCare System</div>
+            <h1>{{ notification.title }}</h1>
+            <span class="notification-type {{ notification.notification_type }}">
+                {{ notification.get_notification_type_display }}
+            </span>
+            <span class="priority {{ notification.priority }}">
+                {{ notification.get_priority_display }} Priority
+            </span>
+        </div>
+        
+        <div class="content">
+            <div class="timestamp">
+                📅 {{ notification.created_at|date:"F d, Y g:i A" }}
+            </div>
+            
+            <div class="message">
+                {{ notification.message|linebreaks }}
+            </div>
+            
+            {% if notification.action_url and notification.action_text %}
+                <a href="{{ notification.action_url }}" class="action-button">
+                    {{ notification.action_text }}
+                </a>
+            {% endif %}
+        </div>
+        
+        <div class="footer">
+            <p>This notification was sent to {{ user.get_full_name|default:user.email }}</p>
+            <p>SmartCare Healthcare Management System</p>
+            <p>If you didn't expect this notification, please contact our support team.</p>
+        </div>
+    </div>
+</body>
+</html>
