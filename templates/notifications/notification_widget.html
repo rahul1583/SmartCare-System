@@ -3,12 +3,9 @@
     <button id="notificationDropdown" class="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
         <i class="fas fa-bell text-xl"></i>
         {% if unread_count > 0 %}
-            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
-            {% if unread_count > 1 %}
-                <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
-                    {{ unread_count }}
-                </span>
-            {% endif %}
+            <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                {{ unread_count }}
+            </span>
         {% endif %}
     </button>
     
@@ -84,21 +81,16 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 const badge = notificationDropdown.querySelector('.bg-red-600');
-                const dot = notificationDropdown.querySelector('.bg-red-500');
                 
                 if (data.unread > 0) {
-                    if (dot) dot.style.display = 'block';
                     if (badge) {
-                        if (data.unread > 1) {
-                            badge.textContent = data.unread;
-                            badge.style.display = 'flex';
-                        } else {
-                            badge.style.display = 'none';
-                        }
+                        badge.textContent = data.unread;
+                        badge.style.display = 'flex';
                     }
                 } else {
-                    if (dot) dot.style.display = 'none';
-                    if (badge) badge.style.display = 'none';
+                    if (badge) {
+                        badge.style.display = 'none';
+                    }
                 }
             })
             .catch(error => console.error('Error updating unread count:', error));

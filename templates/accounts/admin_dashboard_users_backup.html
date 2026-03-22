@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Users - Admin{% endblock %}
+
+{% block content %}
+<div id="csrf-token" style="display:none">{% csrf_token %}</div>
+
+<!-- User Details Modal -->
+<div id="userDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeDetailsModal()"></div>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-200">
+            <div id="modalLoading" class="p-20 text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+                <p class="mt-4 text-gray-600 font-medium">Fetching user details...</p>
+            </div>
+            <div id="modalContent" class="hidden"></div>
+        </div>
+    </div>
+</div>
+
+<div class="min-h-screen bg-slate-50/50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-10">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">System Users</h1>
+                    <p class="mt-2 text-slate-500 font-medium">Dashboard view of all registered healthcare providers and patients.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="{% url 'accounts:export_users_csv' %}" 
+                       class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold text-sm transition-all shadow-sm">
+                        <i class="fas fa-download text-emerald-500"></i>
+                        Export CSV
+                    </a>
+                    <button onclick="window.location.reload()" 
+                            class="inline-flex items-center justify-center w-10 h-10 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-slate-50 transition-all shadow-sm" title="Refresh List">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <a href="{% url 'accounts:admin_add_user' %}" 
+                       class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold text-sm transition-all shadow-lg shadow-blue-500/25 active:scale-95">
+                        <i class="fas fa-plus"></i>
+                        Create New User
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+            <div class="relative max-w-2xl">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-slate-400"></i>
+                </div>
+                <input type="text" id="userSearch" 
+                       placeholder="Search by name, email, or user ID..." 
+                       class="block w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all text-slate-900 placeholder-slate-400 font-medium text-sm">
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead>
+                        <tr class="bg-slate-50/50">
+                            <th class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-widest">User Profile</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-widest">Contact Info</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-widest">System Role</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                            <th class="px-6 py-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-widest">Activity</th>
+                            <th class="px-6 py-4 text-right text-[11px] font-bold text-slate-500 uppercase tracking-widest">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="userTableBody">
+                        {% for user in users %}
+                        <tr class="group hover:bg-slate-50/80 transition-all user-row" data-name="{{ user.get_full_name|lower }}" data-email="{{ user.email|lower }}" data-role="{{ user.role }}">
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative">
+                                        {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" alt="" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-white shadow-sm">
+                                        {% else %}
+                                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 font-bold text-sm ring-2 ring-white shadow-sm">
+                                            {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1"|default:user.email|slice:":1"|upper }}
+                                        </div>
+                                        {% endif %}
+                                        {% if user.is_active %}
+                                        <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full shadow-sm"></div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{{ user.get_full_name|default:user.email }}</div>
+                                        <div class="text-[11px] font-bold text-slate-400 mt-0.5">ID: #{{ user.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex flex-col gap-1.5">
+                                    <div class="flex items-center text-sm text-slate-600 font-medium">
+                                        <i class="fas fa-envelope text-slate-300 mr-2.5 w-4"></i>
+                                        {{ user.email }}
+                                    </div>
+                                    {% if user.phone %}
+                                    <div class="flex items-center text-xs text-slate-500 font-medium">
+                                        <i class="fas fa-phone text-slate-300 mr-2.5 w-4"></i>
+                                        {{ user.phone }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex flex-col">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider
+                                        {% if user.role == 'admin' %}bg-purple-50 text-purple-700 border border-purple-100
+                                        {% elif user.role == 'doctor' %}bg-blue-50 text-blue-700 border border-blue-100
+                                        {% elif user.role == 'patient' %}bg-emerald-50 text-emerald-700 border border-emerald-100
+                                        {% else %}bg-slate-50 text-slate-700 border border-slate-100
+                                        {% endif %} w-fit">
+                                        {{ user.get_role_display }}
+                                    </span>
+                                    {% if user.role == 'doctor' and user.doctor_profile %}
+                                        <span class="text-[11px] font-bold text-slate-500 mt-1.5 ml-0.5">
+                                            {{ user.doctor_profile.specialization|default:'General Practice' }}
+                                        </span>
+                                    {% elif user.role == 'patient' and user.patient_profile %}
+                                        <span class="text-[11px] font-bold text-slate-500 mt-1.5 ml-0.5">
+                                            {{ user.patient_profile.get_gender_display|default:'Not specified' }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex flex-col">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider
+                                        {% if user.is_active %}bg-emerald-50 text-emerald-700 border border-emerald-100
+                                        {% else %}bg-rose-50 text-rose-700 border border-rose-100
+                                        {% endif %} w-fit">
+                                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                    <span class="text-[10px] font-bold text-slate-400 mt-1.5 ml-0.5">
+                                        {{ user.date_joined|date:"M d, Y" }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap">
+                                <div class="flex flex-col gap-2">
+                                    {% if user.role == 'doctor' %}
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center">
+                                                <i class="fas fa-calendar-check text-[10px] text-blue-500"></i>
+                                            </div>
+                                            <span class="text-[11px] font-bold text-slate-600">{{ user.doctor_appointments.count|default:'0' }} Appt.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center">
+                                                <i class="fas fa-prescription text-[10px] text-emerald-500"></i>
+                                            </div>
+                                            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                                <div class="flex-1">
+                                                    <div class="font-medium text-gray-800">{{ user.doctor_prescriptions.count|default:'0' }} Presc.</div>
+                                                    <div class="text-sm text-gray-600">Dr. {{ user.get_full_name|default:user.email }}</div>
+                                                    <div class="text-xs text-gray-500">{{ user.date_joined|date:"M d" }}</div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <span class="text-xs text-gray-500">{{ user.date_joined|date:"M d" }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% elif user.role == 'patient' %}
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center">
+                                                <i class="fas fa-calendar-check text-[10px] text-blue-500"></i>
+                                            </div>
+                                            <span class="text-[11px] font-bold text-slate-600">{{ user.patient_appointments.count|default:'0' }} Appt.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-lg bg-orange-50 flex items-center justify-center">
+                                                <i class="fas fa-file-invoice-dollar text-[10px] text-orange-500"></i>
+                                            </div>
+                                            <span class="text-[11px] font-bold text-slate-600">{{ user.bills.count|default:'0' }} Bills</span>
+                                        </div>
+                                    {% else %}
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-6 h-6 rounded-lg bg-purple-50 flex items-center justify-center">
+                                                <i class="fas fa-user-shield text-[10px] text-purple-500"></i>
+                                            </div>
+                                            <span class="text-[11px] font-bold text-slate-600 tracking-tight">System Admin</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button onclick="viewUserDetails('{{ user.id }}')" 
+                                            class="w-9 h-9 rounded-xl bg-slate-50 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 transition-all flex items-center justify-center" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="confirmDeleteUser('{{ user.id }}', '{{ user.get_full_name|default:user.email|escapejs }}')" 
+                                            class="w-9 h-9 rounded-xl bg-slate-50 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all flex items-center justify-center" title="Delete User">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center">
+                                        <div class="text-gray-500">
+                                            <i class="fas fa-users text-4xl mb-4"></i>
+                                            <p class="text-lg font-medium">No users found</p>
+                                            <p class="text-sm">Get started by adding your first user.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="text-gray-500">
+                            <i class="fas fa-users text-4xl mb-4"></i>
+                            <p class="text-lg font-medium">No users found</p>
+                            <p class="text-sm">Get started by adding your first user.</p>
+                        </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('userSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('.user-row');
+    let hasResults = false;
+
+    rows.forEach(row => {
+        const name = row.dataset.name;
+        const email = row.dataset.email;
+        if (name.includes(searchTerm) || email.includes(searchTerm)) {
+            row.style.display = '';
+            hasResults = true;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    const emptyState = document.getElementById('noResultsFound');
+    if (!hasResults && searchTerm !== '') {
+        if (!emptyState) {
+            const tr = document.createElement('tr');
+            tr.id = 'noResultsFound';
+            tr.innerHTML = `<td colspan="6" class="px-6 py-12 text-center text-gray-500">No users match your search "${searchTerm}"</td>`;
+            document.getElementById('userTableBody').appendChild(tr);
+        } else {
+            emptyState.innerHTML = `<td colspan="6" class="px-6 py-12 text-center text-gray-500">No users match your search "${searchTerm}"</td>`;
+            emptyState.style.display = '';
+        }
+    } else if (emptyState) {
+        emptyState.style.display = 'none';
+    }
+});
+
+function viewUserDetails(userId) {
+    const modal = document.getElementById('userDetailsModal');
+    const loading = document.getElementById('modalLoading');
+    const content = document.getElementById('modalContent');
+    
+    modal.classList.remove('hidden');
+    loading.classList.remove('hidden');
+    content.classList.add('hidden');
+    
+    const url = `{% url 'accounts:user_details' 0 %}`.replace('0', userId);
+    
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        content.innerHTML = html;
+        loading.classList.add('hidden');
+        content.classList.remove('hidden');
+    })
+    .catch(error => {
+        console.error('Error fetching user details:', error);
+        alert('Error fetching user details');
+        closeDetailsModal();
+    });
+}
+
+function closeDetailsModal() {
+    document.getElementById('userDetailsModal').classList.add('hidden');
+}
+
+function toggleUserStatus(userId) {
+    if (confirm('Are you sure you want to toggle this user\'s status?')) {
+        fetch(`/accounts/admin/users/${userId}/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while toggling user status');
+        });
+    }
+}
+
+function confirmDeleteUser(userId, userName) {
+    if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+        fetch(`/accounts/admin/users/${userId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                alertDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>${data.message}</span>
+                    </div>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                // Remove alert after 3 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                    // Reload page to show updated user list
+                    location.reload();
+                }, 3000);
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting user');
+        });
+    }
+}
+</script>
+{% endblock %}

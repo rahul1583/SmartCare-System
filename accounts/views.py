@@ -514,13 +514,28 @@ def admin_users_view(request):
 
 @login_required
 def admin_dashboard_users_view(request):
-    """Dashboard users page with same design as admin users"""
+    """Dashboard users page with notification counts"""
     if not request.user.is_admin:
         messages.error(request, 'Access denied!')
         return redirect('accounts:dashboard')
     
+    from notifications.models import Notification
+    
+    # Get all users with their notification counts
     users = User.objects.all()
-    return render(request, 'accounts/admin_dashboard_users.html', {'users': users})
+    
+    # Add notification count to each user
+    for user in users:
+        user.unread_notifications = Notification.objects.filter(
+            recipient=user, 
+            is_read=False
+        ).count()
+    
+    context = {
+        'users': users,
+    }
+    
+    return render(request, 'accounts/admin_dashboard_users.html', context)
 
 @login_required
 def user_details_view(request, user_id):

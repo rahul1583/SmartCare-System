@@ -15,26 +15,11 @@ def notification_list(request):
     """View all notifications for the user"""
     notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
     
-    # Filter by read status
-    is_read = request.GET.get('is_read')
-    if is_read is not None:
-        notifications = notifications.filter(is_read=is_read == 'true')
-    
-    # Filter by type
-    notification_type = request.GET.get('type')
-    if notification_type:
-        notifications = notifications.filter(notification_type=notification_type)
-    
-    # Filter by priority
-    priority = request.GET.get('priority')
-    if priority:
-        notifications = notifications.filter(priority=priority)
+    # Mark all notifications as read when user visits the page
+    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
     
     context = {
         'notifications': notifications,
-        'unread_count': Notification.objects.filter(recipient=request.user, is_read=False).count(),
-        'notification_types': Notification.NOTIFICATION_TYPES,
-        'priority_levels': Notification.PRIORITY_LEVELS,
     }
     
     return render(request, 'notifications/notification_list.html', context)
@@ -197,15 +182,6 @@ class NotificationListView(LoginRequiredMixin, ListView):
             recipient=self.request.user, 
             is_read=False
         ).count()
-        context['notification_types'] = Notification.NOTIFICATION_TYPES
-        context['priority_levels'] = Notification.PRIORITY_LEVELS
-        
-        # Get notification statistics
-        stats = Notification.objects.filter(recipient=self.request.user).values(
-            'notification_type'
-        ).annotate(count=Count('id')).order_by('-count')
-        context['notification_stats'] = stats
-        
         return context
 
 
