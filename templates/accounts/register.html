@@ -133,6 +133,22 @@
                         </button>
                     </div>
                 </form>
+
+                <!-- Divider -->
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                    </div>
+                </div>
+
+                <!-- Google Sign-in -->
+                <a href="{% url 'accounts:google_login_start' %}" class="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="w-5 h-5 mr-3">
+                    <span class="text-gray-700 font-medium">Google</span>
+                </a>
                 
                 {% if messages %}
                     <div class="mt-6">

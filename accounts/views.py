@@ -34,32 +34,47 @@ def _google_login_enabled():
         return False
 
 def _ensure_google_social_app_from_env():
+    """
+    Ensure a SocialApp for Google exists in the database using credentials from .env.
+    This provides a fallback in case settings-based configuration is not picked up.
+    """
     google_client_id = os.getenv('GOOGLE_CLIENT_ID', '').strip()
     google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET', '').strip()
-    if not (google_client_id and google_client_secret):
+
+    if not google_client_id or not google_client_secret:
         return
 
     try:
-        from django.conf import settings
         from allauth.socialaccount.models import SocialApp
         from django.contrib.sites.models import Site
+        from django.conf import settings
 
         site = Site.objects.get(id=settings.SITE_ID)
-        app, created = SocialApp.objects.get_or_create(
-            provider='google',
-            client_id=google_client_id,
-            defaults={
-                'name': 'Google',
-                'secret': google_client_secret,
-                'key': '',
-            },
-        )
-        if not created and app.secret != google_client_secret:
+        
+        # Try to find existing app
+        app = SocialApp.objects.filter(provider='google').first()
+        
+        if app:
+            # Update existing app
+            app.client_id = google_client_id
             app.secret = google_client_secret
-            app.save(update_fields=['secret'])
-        app.sites.add(site)
-    except Exception:
-        return
+            app.name = 'Google'
+            app.save()
+        else:
+            # Create new app
+            app = SocialApp.objects.create(
+                provider='google',
+                name='Google',
+                client_id=google_client_id,
+                secret=google_client_secret
+            )
+        
+        # Ensure it's attached to the correct site
+        if not app.sites.filter(id=settings.SITE_ID).exists():
+            app.sites.add(site)
+            
+    except Exception as e:
+        print(f"Error ensuring Google SocialApp: {e}")
 
 def google_login_start_view(request):
     _ensure_google_social_app_from_env()
