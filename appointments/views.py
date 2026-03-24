@@ -9,10 +9,14 @@ from django.db.models import Count
 import json
 from .models import Appointment, DoctorAvailability
 from .forms import AppointmentBookingForm, DoctorAppointmentBookingForm
+from .utils import cancel_expired_pending_appointments
 from accounts.models import User
 
 @login_required
 def easy_appointments_view(request):
+    # Automatically cancel expired pending appointments
+    cancel_expired_pending_appointments()
+    
     # Get user's appointments for statistics
     if request.user.is_patient:
         user_appointments = Appointment.objects.filter(patient=request.user)
@@ -63,6 +67,9 @@ def easy_appointments_view(request):
 # Placeholder views - to be implemented
 @login_required
 def appointment_list_view(request):
+    # Automatically cancel expired pending appointments
+    cancel_expired_pending_appointments()
+    
     # Get user's appointments
     if request.user.is_patient:
         appointments = Appointment.objects.filter(patient=request.user).order_by('-date_time')
@@ -209,6 +216,14 @@ def approve_appointment_view(request, appointment_id):
                 messages.error(request, 'Cannot approve a cancelled appointment.')
             elif appointment.status == 'completed':
                 messages.error(request, 'Cannot approve a completed appointment.')
+            return redirect('appointments:appointment_detail', appointment_id=appointment.id)
+        
+        # Check if appointment date has passed
+        if appointment.date_time < timezone.now():
+            appointment.status = 'cancelled'
+            appointment.notes = f"Automatically cancelled on {timezone.now().strftime('%Y-%m-%d')} because the doctor tried to approve it after the scheduled date ({appointment.date_time.strftime('%Y-%m-%d')})."
+            appointment.save()
+            messages.error(request, 'This appointment has expired and has been automatically cancelled.')
             return redirect('appointments:appointment_detail', appointment_id=appointment.id)
         
         # Approve the appointment

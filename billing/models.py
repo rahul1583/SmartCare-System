@@ -44,7 +44,8 @@ class Bill(models.Model):
             return f"Bill #{self.id} - {self.patient.get_full_name()} - Rs.{self.total_amount}"
     
     def calculate_total(self):
-        subtotal = (self.consultation_fee + self.medicine_fee + self.lab_fee + 
+        # Exclude medicine_fee from total_amount as per user request
+        subtotal = (self.consultation_fee + self.lab_fee + 
                    self.other_fee + self.additional_charges - self.discount_amount)
         self.total_amount = subtotal + self.tax_amount
         self.save()

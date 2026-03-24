@@ -159,10 +159,6 @@
             <h3 class="font-semibold text-gray-700 mb-3">Fee Breakdown</h3>
             <div class="space-y-2">
                 <div class="flex justify-between">
-                    <span class="text-gray-600">💊 Medicine Fee:</span>
-                    <span class="font-bold text-green-700">Rs. {{ bill.medicine_fee }}</span>
-                </div>
-                <div class="flex justify-between">
                     <span class="text-gray-600">👨‍⚕️ Consultation Fee:</span>
                     <span class="font-bold text-blue-700">Rs. {{ bill.consultation_fee }}</span>
                 </div>
@@ -247,7 +243,10 @@
         <!-- Medicine Details (if exists) -->
         {% if bill.prescription and bill.prescription.medications.exists %}
             <div class="bg-yellow-50 rounded-lg p-4 mb-6 print-break">
-                <h3 class="font-semibold text-gray-700 mb-3">Medicine Details</h3>
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold text-gray-700">Medicine Details</h3>
+                    <span class="text-xs font-medium text-gray-500 italic bg-gray-100 px-2 py-1 rounded">Excluded from Bill Total</span>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>

@@ -443,8 +443,8 @@ def create_bill_from_prescription_view(request, prescription_id):
                     medicine_price = request.POST.get(price_key, '0')
                     medicine_fee += Decimal(medicine_price or '0')
                 
-                # Calculate total amount
-                total_amount = consultation_fee + medicine_fee + lab_fee + other_fee
+                # Calculate total amount (medicine_fee excluded from total_amount)
+                total_amount = consultation_fee + lab_fee + other_fee
                 
                 # Create bill from prescription
                 with transaction.atomic():

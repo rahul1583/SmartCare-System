@@ -113,12 +113,6 @@
                                                 <span class="text-gray-600">Consultation Fee:</span>
                                                 <span class="font-medium">Rs. {{ bill.consultation_fee|default:0 }}</span>
                                             </div>
-                                            {% if bill.medicine_fee %}
-                                            <div class="flex justify-between">
-                                                <span class="text-gray-600">Medicine Fee:</span>
-                                                <span class="font-medium">Rs. {{ bill.medicine_fee }}</span>
-                                            </div>
-                                            {% endif %}
                                             {% if bill.lab_fee %}
                                             <div class="flex justify-between">
                                                 <span class="text-gray-600">Lab Tests:</span>

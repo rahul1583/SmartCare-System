@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from .models import User, PatientProfile, DoctorProfile
 from .forms import UserRegistrationForm, PatientProfileForm, DoctorProfileForm, UserUpdateForm
 from appointments.models import Appointment
+from appointments.utils import cancel_expired_pending_appointments
 from prescriptions.models import Prescription
 from billing.models import Bill
 import os
@@ -324,6 +325,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 def dashboard_view(request):
     user = request.user
     
+    # Automatically cancel expired pending appointments
+    cancel_expired_pending_appointments()
+    
     # Debug: Print user role information
     print(f"DashboardView - User: {user.email}, Role: {user.role}, is_admin: {user.is_admin}")
     
@@ -358,11 +362,32 @@ def dashboard_view(request):
         ).order_by('-date_time')[:5]
         context['recent_appointments'] = recent_appointments
         
-        # Get recent prescriptions
+        # Get recent prescriptions (last 24 hours)
+        last_24h = timezone.now() - timedelta(hours=24)
         recent_prescriptions = Prescription.objects.filter(
-            doctor=user
+            doctor=user,
+            created_at__gte=last_24h
         ).order_by('-created_at')[:5]
-        context['recent_prescriptions'] = recent_prescriptions
+        context['prescriptions'] = recent_prescriptions
+        
+        # Get recent bills with payment information (last 24 hours)
+        last_24h = timezone.now() - timedelta(hours=24)
+        recent_bills = Bill.objects.filter(
+            doctor=user,
+            created_at__gte=last_24h
+        ).order_by('-created_at')[:5]
+        
+        bills_with_payments = []
+        for bill in recent_bills:
+            paid_amount = bill.get_paid_amount()
+            remaining_balance = bill.get_remaining_balance()
+            bills_with_payments.append({
+                'bill': bill,
+                'paid_amount': paid_amount,
+                'remaining_balance': remaining_balance,
+                'is_fully_paid': remaining_balance <= 0
+            })
+        context['bills_with_payments'] = bills_with_payments
         
         # Get statistics
         total_appointments = Appointment.objects.filter(doctor=user).count()
@@ -387,6 +412,9 @@ def patient_dashboard_view(request):
         messages.error(request, 'Access denied. This page is for patients only.')
         return redirect('accounts:dashboard')
     
+    # Automatically cancel expired pending appointments
+    cancel_expired_pending_appointments()
+    
     # Get upcoming appointments
     now = timezone.now()
     upcoming_appointments = Appointment.objects.filter(
@@ -401,10 +429,30 @@ def patient_dashboard_view(request):
         is_active=True
     ).select_related('doctor_profile').order_by('doctor_profile__specialization')[:6]
     
-    # Get recent prescriptions
+    # Get recent prescriptions (last 24 hours)
+    last_24h = timezone.now() - timedelta(hours=24)
     recent_prescriptions = Prescription.objects.filter(
-        patient=request.user
-    ).select_related('doctor').order_by('-created_at')[:3]
+        patient=request.user,
+        created_at__gte=last_24h
+    ).select_related('doctor').order_by('-created_at')[:5]
+    
+    # Get recent bills with payment information (last 24 hours)
+    last_24h = timezone.now() - timedelta(hours=24)
+    recent_bills = Bill.objects.filter(
+        patient=request.user,
+        created_at__gte=last_24h
+    ).order_by('-created_at')[:5]
+    
+    bills_with_payments = []
+    for bill in recent_bills:
+        paid_amount = bill.get_paid_amount()
+        remaining_balance = bill.get_remaining_balance()
+        bills_with_payments.append({
+            'bill': bill,
+            'paid_amount': paid_amount,
+            'remaining_balance': remaining_balance,
+            'is_fully_paid': remaining_balance <= 0
+        })
     
     # Get patient profile
     try:
@@ -424,6 +472,7 @@ def patient_dashboard_view(request):
         'upcoming_appointments': upcoming_appointments,
         'available_doctors': available_doctors,
         'recent_prescriptions': recent_prescriptions,
+        'bills_with_payments': bills_with_payments,
         'profile': profile,
         'total_appointments': total_appointments,
         'completed_appointments': completed_appointments,
@@ -442,6 +491,9 @@ def admin_dashboard_view(request):
         messages.error(request, 'Access denied! Admin access required.')
         return redirect('accounts:dashboard')
 
+    # Automatically cancel expired pending appointments
+    cancel_expired_pending_appointments()
+
     # Core counts
     total_users = User.objects.count()
     total_doctors = User.objects.filter(role='doctor').count()
@@ -456,11 +508,31 @@ def admin_dashboard_view(request):
     except Exception:
         total_revenue = 0
 
+    # Get recent data (bills and prescriptions within last 24 hours)
+    last_24h = timezone.now() - timedelta(hours=24)
+    recent_appointments = Appointment.objects.all().select_related('patient', 'doctor').order_by('-created_at')[:5]
+    recent_prescriptions = Prescription.objects.filter(created_at__gte=last_24h).select_related('patient', 'doctor').order_by('-created_at')[:5]
+    recent_bills = Bill.objects.filter(created_at__gte=last_24h).select_related('patient', 'doctor').order_by('-created_at')[:5]
+    
+    bills_with_payments = []
+    for bill in recent_bills:
+        paid_amount = bill.get_paid_amount()
+        remaining_balance = bill.get_remaining_balance()
+        bills_with_payments.append({
+            'bill': bill,
+            'paid_amount': paid_amount,
+            'remaining_balance': remaining_balance,
+            'is_fully_paid': remaining_balance <= 0
+        })
+
     context = {
         'total_users': total_users,
         'total_doctors': total_doctors,
         'total_patients': total_patients,
         'total_revenue': total_revenue,
+        'recent_appointments': recent_appointments,
+        'recent_prescriptions': recent_prescriptions,
+        'bills_with_payments': bills_with_payments,
         'system_health': 'Healthy',
         'server_uptime': '99.9%',
         'user': request.user,
