@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Professional Admin Styles */
+.admin-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+.admin-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.admin-header .subtitle {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+/* Statistics Cards */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+.stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+.stat-card.admin { --gradient-start: #8b5cf6; --gradient-end: #7c3aed; }
+.stat-card.doctor { --gradient-start: #3b82f6; --gradient-end: #2563eb; }
+.stat-card.patient { --gradient-start: #10b981; --gradient-end: #059669; }
+.stat-card.total { --gradient-start: #6b7280; --gradient-end: #4b5563; }
+
+.stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+.stat-card.admin .stat-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.stat-card.doctor .stat-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.stat-card.patient .stat-icon { background: linear-gradient(135deg, #10b981, #059669); }
+.stat-card.total .stat-icon { background: linear-gradient(135deg, #6b7280, #4b5563); }
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+.stat-label {
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* User Sections */
+.user-section {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+.user-section-header {
+    padding: 1.5rem 2rem;
+    color: white;
+    position: relative;
+}
+.user-section-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+.user-section-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.user-section-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+.admin-header-gradient { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+.doctor-header-gradient { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.patient-header-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+
+/* Professional Table */
+.user-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.user-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #e2e8f0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.user-table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.user-table tr:hover td {
+    background: #f8fafc;
+}
+.user-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* User Avatar & Info */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.user-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #475569;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.user-details .name {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+.user-details .id {
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+/* Status & Badges */
+.status-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+.status-badge::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+.status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+.status-inactive {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.specialization-badge, .phone-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-block;
+}
+.specialization-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+.phone-badge {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.notification-badge {
+    background: #ef4444;
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    min-width: 2.5rem;
+    text-align: center;
+    display: inline-block;
+}
+.notification-zero {
+    background: #f3f4f6;
+    color: #9ca3af;
+}
+
+/* Empty States */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #94a3b8;
+}
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.3;
+    color: #cbd5e1;
+}
+.empty-state h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+.empty-state p {
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Search & Filter Bar */
+.toolbar {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.search-box {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+}
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+.search-box input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-header h1 { font-size: 2rem; }
+    .stats-container { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .stat-card { padding: 1.5rem; }
+    .stat-number { font-size: 2rem; }
+    .user-table { font-size: 0.875rem; }
+    .user-table th, .user-table td { padding: 1rem; }
+    .user-info { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .toolbar { flex-direction: column; }
+    .search-box { width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Professional Header -->
+<div class="admin-header">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1>👥 User Management</h1>
+                <p class="subtitle">Comprehensive user administration and role management</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <div class="text-sm opacity-75">Total System Users</div>
+                    <div class="text-2xl font-bold">{{ users|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto px-4">
+    <!-- Statistics Overview -->
+    <div class="stats-container">
+        <div class="stat-card admin">
+            <div class="stat-icon">👑</div>
+            <div class="stat-number">{{ admins|length }}</div>
+            <div class="stat-label">Administrators</div>
+        </div>
+        <div class="stat-card doctor">
+            <div class="stat-icon">👨‍⚕️</div>
+            <div class="stat-number">{{ doctors|length }}</div>
+            <div class="stat-label">Doctors</div>
+        </div>
+        <div class="stat-card patient">
+            <div class="stat-icon">👥</div>
+            <div class="stat-number">{{ patients|length }}</div>
+            <div class="stat-label">Patients</div>
+        </div>
+        <div class="stat-card total">
+            <div class="stat-icon">📊</div>
+            <div class="stat-number">{{ users|length }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+
+    <!-- Search Toolbar -->
+    <div class="toolbar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search users by name or email..." id="userSearch">
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600">Filter by role:</span>
+            <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm" id="roleFilter">
+                <option value="">All Users</option>
+                <option value="admin">Administrators</option>
+                <option value="doctor">Doctors</option>
+                <option value="patient">Patients</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Administrators Section -->
+    <div class="user-section" data-role="admin">
+        <div class="user-section-header admin-header-gradient">
+            <h3><i class="fas fa-user-shield"></i> Administrators</h3>
+            <p>System administrators with full access and control privileges</p>
+        </div>
+        {% if admins %}
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>User Information</th>
+                        <th>Email Address</th>
+                        <th>Account Status</th>
+                        <th>Notifications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in admins %}
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">{{ user.get_full_name|make_list|first|upper|default:user.email|make_list|first|upper }}</div>
+                                    <div class="user-details">
+                                        <div class="name">{{ user.get_full_name|default:user.email }}</div>
+                                        <div class="id">ID: #{{ user.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-gray-700">{{ user.email }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user.unread_notifications > 0 %}
+                                    <span class="notification-badge">{{ user.unread_notifications }}</span>
+                                {% else %}
+                                    <span class="notification-badge notification-zero">0</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-user-shield"></i>
+                <h4>No Administrators Found</h4>
+                <p>System administrators will appear here once created</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Doctors Section -->
+    <div class="user-section" data-role="doctor">
+        <div class="user-section-header doctor-header-gradient">
+            <h3><i class="fas fa-user-md"></i> Medical Practitioners</h3>
+            <p>Healthcare professionals providing medical services and patient care</p>
+        </div>
+        {% if doctors %}
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>User Information</th>
+                        <th>Email Address</th>
+                        <th>Specialization</th>
+                        <th>Account Status</th>
+                        <th>Notifications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in doctors %}
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">{{ user.get_full_name|make_list|first|upper|default:user.email|make_list|first|upper }}</div>
+                                    <div class="user-details">
+                                        <div class="name">{{ user.get_full_name|default:user.email }}</div>
+                                        <div class="id">ID: #{{ user.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-gray-700">{{ user.email }}</span>
+                            </td>
+                            <td>
+                                {% if user.doctor_profile.specialization %}
+                                    <span class="specialization-badge">{{ user.doctor_profile.specialization }}</span>
+                                {% else %}
+                                    <span class="text-gray-400">Not specified</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user.unread_notifications > 0 %}
+                                    <span class="notification-badge">{{ user.unread_notifications }}</span>
+                                {% else %}
+                                    <span class="notification-badge notification-zero">0</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-user-md"></i>
+                <h4>No Doctors Found</h4>
+                <p>Medical practitioners will appear here once registered</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Patients Section -->
+    <div class="user-section" data-role="patient">
+        <div class="user-section-header patient-header-gradient">
+            <h3><i class="fas fa-user-injured"></i> Patients</h3>
+            <p>Healthcare service recipients and patients under medical care</p>
+        </div>
+        {% if patients %}
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>User Information</th>
+                        <th>Email Address</th>
+                        <th>Contact Information</th>
+                        <th>Account Status</th>
+                        <th>Notifications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in patients %}
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">{{ user.get_full_name|make_list|first|upper|default:user.email|make_list|first|upper }}</div>
+                                    <div class="user-details">
+                                        <div class="name">{{ user.get_full_name|default:user.email }}</div>
+                                        <div class="id">ID: #{{ user.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-gray-700">{{ user.email }}</span>
+                            </td>
+                            <td>
+                                {% if user.patient_profile.phone %}
+                                    <span class="phone-badge">📞 {{ user.patient_profile.phone }}</span>
+                                {% else %}
+                                    <span class="text-gray-400">No phone provided</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user.unread_notifications > 0 %}
+                                    <span class="notification-badge">{{ user.unread_notifications }}</span>
+                                {% else %}
+                                    <span class="notification-badge notification-zero">0</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-user-injured"></i>
+                <h4>No Patients Found</h4>
+                <p>Patients will appear here once registered in the system</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('userSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const allRows = document.querySelectorAll('.user-table tbody tr');
+    
+    allRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Role filter functionality
+document.getElementById('roleFilter').addEventListener('change', function(e) {
+    const selectedRole = e.target.value;
+    const allSections = document.querySelectorAll('.user-section');
+    
+    allSections.forEach(section => {
+        if (selectedRole === '' || section.dataset.role === selectedRole) {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+
+{% block title %}Video Call - SmartCare System{% endblock %}
+
+{% block extra_css %}
+<style>
+.video-container {
+    background: #000;
+    border-radius: 1rem;
+    overflow: hidden;
+    position: relative;
+    height: 70vh;
+    min-height: 400px;
+}
+.video-main {
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+.video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+.control-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.control-btn:hover {
+    transform: scale(1.1);
+}
+.control-btn.mic {
+    background: #4a5568;
+    color: white;
+}
+.control-btn.camera {
+    background: #4a5568;
+    color: white;
+}
+.control-btn.end-call {
+    background: #e53e3e;
+    color: white;
+}
+.control-btn.end-call:hover {
+    background: #c53030;
+}
+.video-info {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+.video-timer {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-family: monospace;
+}
+.participant-video {
+    position: absolute;
+    bottom: 6rem;
+    right: 1rem;
+    width: 200px;
+    height: 150px;
+    background: #2d3748;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: 2px solid #4a5568;
+}
+.waiting-room {
+    text-align: center;
+    padding: 3rem;
+}
+.waiting-room i {
+    font-size: 4rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+.call-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+.status-active {
+    background: #48bb78;
+    color: white;
+}
+.status-waiting {
+    background: #ed8936;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            {% if is_doctor %}
+                Video Call with {{ video_call.patient.get_full_name|default:video_call.patient.email }}
+            {% else %}
+                Video Call with Dr. {{ video_call.doctor.get_full_name|default:video_call.doctor.email }}
+            {% endif %}
+        </h1>
+        <div class="flex items-center gap-4 mt-2">
+            <span class="call-status status-{{ video_call.status }}">
+                {{ video_call.status|title }}
+            </span>
+            <span class="text-gray-600">
+                Room: {{ room_id }}
+            </span>
+            {% if video_call.start_time %}
+                <span class="video-timer" id="call-timer">00:00</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Video Container -->
+    <div class="video-container">
+        {% if video_call.status == 'waiting' %}
+            <div class="waiting-room">
+                <i class="fas fa-video"></i>
+                <h3 class="text-xl font-semibold text-white mb-2">Waiting for participant...</h3>
+                <p class="text-gray-300">The other person will join shortly</p>
+                <div class="mt-4">
+                    <div class="animate-pulse">
+                        <i class="fas fa-circle text-red-500"></i>
+                        Connecting...
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="video-main" id="local-video">
+                <i class="fas fa-user"></i>
+                <span class="ml-2">Your video will appear here</span>
+            </div>
+        {% endif %}
+
+        <!-- Participant Video -->
+        {% if video_call.status == 'active' %}
+            <div class="participant-video" id="remote-video">
+                <i class="fas fa-user"></i>
+            </div>
+        {% endif %}
+
+        <!-- Video Info -->
+        <div class="video-info">
+            <div class="font-semibold">
+                {% if is_doctor %}
+                    {{ video_call.patient.get_full_name|default:video_call.patient.email }}
+                {% else %}
+                    Dr. {{ video_call.doctor.get_full_name|default:video_call.doctor.email }}
+                {% endif %}
+            </div>
+            <div class="text-sm opacity-80">
+                {% if video_call.appointment %}
+                    {{ video_call.appointment.reason|default:"Consultation" }}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Call Timer -->
+        {% if video_call.start_time %}
+            <div class="video-timer" id="call-timer">00:00</div>
+        {% endif %}
+
+        <!-- Video Controls -->
+        <div class="video-controls">
+            <button class="control-btn mic" id="mic-toggle" title="Toggle Microphone">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="control-btn camera" id="camera-toggle" title="Toggle Camera">
+                <i class="fas fa-video"></i>
+            </button>
+            <button class="control-btn end-call" id="end-call" title="End Call">
+                <i class="fas fa-phone"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Call Information -->
+    <div class="mt-6 bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Consultation Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <span class="text-gray-600">Appointment Time:</span>
+                <span class="font-medium ml-2">
+                    {{ video_call.appointment.date_time|date:"F d, Y g:i A" }}
+                </span>
+            </div>
+            <div>
+                <span class="text-gray-600">Duration:</span>
+                <span class="font-medium ml-2">
+                    {% if video_call.duration_minutes %}
+                        {{ video_call.duration_minutes }} minutes
+                    {% else %}
+                        In progress
+                    {% endif %}
+                </span>
+            </div>
+            <div>
+                <span class="text-gray-600">Room ID:</span>
+                <span class="font-medium ml-2">{{ room_id }}</span>
+            </div>
+            <div>
+                <span class="text-gray-600">Status:</span>
+                <span class="font-medium ml-2">{{ video_call.status|title }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// WebRTC Video Call Implementation
+let localStream = null;
+let remoteStream = null;
+let peerConnection = null;
+let isMicMuted = false;
+let isCameraOff = false;
+
+// Initialize WebRTC
+async function initWebRTC() {
+    try {
+        // Get local media stream
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        });
+        
+        // Display local video
+        const localVideo = document.getElementById('local-video');
+        if (localVideo) {
+            localVideo.srcObject = localStream;
+        }
+        
+        // Create peer connection
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        };
+        
+        peerConnection = new RTCPeerConnection(configuration);
+        
+        // Add local stream to peer connection
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+        });
+        
+        // Handle remote stream
+        peerConnection.ontrack = (event) => {
+            remoteStream = event.streams[0];
+            const remoteVideo = document.getElementById('remote-video');
+            if (remoteVideo) {
+                remoteVideo.srcObject = remoteStream;
+            }
+        };
+        
+    } catch (error) {
+        console.error('Error accessing media devices:', error);
+        showMessage('Unable to access camera/microphone', 'error');
+    }
+}
+
+// Toggle Microphone
+document.getElementById('mic-toggle').addEventListener('click', function() {
+    if (localStream) {
+        const audioTracks = localStream.getAudioTracks();
+        audioTracks.forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        
+        isMicMuted = !isMicMuted;
+        this.innerHTML = isMicMuted ? 
+            '<i class="fas fa-microphone-slash"></i>' : 
+            '<i class="fas fa-microphone"></i>';
+        
+        this.style.background = isMicMuted ? '#e53e3e' : '#4a5568';
+    }
+});
+
+// Toggle Camera
+document.getElementById('camera-toggle').addEventListener('click', function() {
+    if (localStream) {
+        const videoTracks = localStream.getVideoTracks();
+        videoTracks.forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        
+        isCameraOff = !isCameraOff;
+        this.innerHTML = isCameraOff ? 
+            '<i class="fas fa-video-slash"></i>' : 
+            '<i class="fas fa-video"></i>';
+        
+        this.style.background = isCameraOff ? '#e53e3e' : '#4a5568';
+    }
+});
+
+// End Call
+document.getElementById('end-call').addEventListener('click', function() {
+    if (confirm('Are you sure you want to end this call?')) {
+        endCall();
+    }
+});
+
+async function endCall() {
+    // Stop local stream
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
+    
+    // Close peer connection
+    if (peerConnection) {
+        peerConnection.close();
+    }
+    
+    // Call server to end call
+    try {
+        const response = await fetch(`/charts/video-call/{{ room_id }}/end/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            showMessage('Call ended successfully', 'success');
+            setTimeout(() => {
+                window.location.href = '/charts/video-calls/';
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('Error ending call:', error);
+        window.location.href = '/charts/video-calls/';
+    }
+}
+
+// Call Timer
+let callStartTime = null;
+{% if video_call.start_time %}
+callStartTime = new Date('{{ video_call.start_time|date:"c" }}');
+{% endif %}
+
+function updateCallTimer() {
+    if (callStartTime) {
+        const now = new Date();
+        const duration = Math.floor((now - callStartTime) / 1000);
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        
+        const timerElement = document.getElementById('call-timer');
+        if (timerElement) {
+            timerElement.textContent = 
+                String(minutes).padStart(2, '0') + ':' + 
+                String(seconds).padStart(2, '0');
+        }
+    }
+}
+
+// Update timer every second
+setInterval(updateCallTimer, 1000);
+
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showMessage(message, type) {
+    // Simple message display (you can enhance this)
+    console.log(`${type}: ${message}`);
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initWebRTC();
+});
+</script>
+{% endblock %}

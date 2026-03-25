@@ -454,11 +454,9 @@ document.getElementById('roleFilter').addEventListener('change', function(e) {
 
 // User details modal functionality
 function showUserDetails(userId) {
-    console.log('Fetching details for user ID:', userId);
     fetch(`/accounts/admin/users/${userId}/details/`)
         .then(response => response.json())
         .then(data => {
-            console.log('User data received:', data);
             if (data.success) {
                 displayUserDetails(data.user);
                 document.getElementById('userDetailsModal').classList.remove('hidden');
@@ -477,8 +475,6 @@ function closeUserDetails() {
 }
 
 function displayUserDetails(user) {
-    console.log('Displaying user details:', user);
-    
     const content = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Basic Information -->
@@ -572,7 +568,7 @@ function displayUserDetails(user) {
             </div>
             ` : ''}
 
-            ${user.role === 'patient' ? `
+            ${user.role === 'patient' && user.patient_profile ? `
             <!-- Patient Profile -->
             <div class="bg-emerald-50 rounded-xl p-6">
                 <h4 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
@@ -582,31 +578,31 @@ function displayUserDetails(user) {
                 <div class="space-y-3">
                     <div>
                         <span class="text-sm text-slate-500">Date of Birth:</span>
-                        <p class="font-medium text-slate-900">${user.patient_profile && user.patient_profile.date_of_birth ? new Date(user.patient_profile.date_of_birth).toLocaleDateString() : 'Not provided'}</p>
+                        <p class="font-medium text-slate-900">${user.patient_profile.date_of_birth ? new Date(user.patient_profile.date_of_birth).toLocaleDateString() : 'Not provided'}</p>
                     </div>
                     <div>
                         <span class="text-sm text-slate-500">Gender:</span>
-                        <p class="font-medium text-slate-900">${user.patient_profile && user.patient_profile.gender ? user.patient_profile.gender : 'Not provided'}</p>
+                        <p class="font-medium text-slate-900">${user.patient_profile.gender || 'Not provided'}</p>
                     </div>
                     <div>
                         <span class="text-sm text-slate-500">Blood Group:</span>
-                        <p class="font-medium text-slate-900">${user.patient_profile && user.patient_profile.blood_group ? user.patient_profile.blood_group : 'Not provided'}</p>
-                    </div>
-                    <div>
-                        <span class="text-sm text-slate-500">Address:</span>
-                        <p class="font-medium text-slate-900">${user.patient_profile && user.patient_profile.address ? user.patient_profile.address : 'Not provided'}</p>
+                        <p class="font-medium text-slate-900">${user.patient_profile.blood_group || 'Not provided'}</p>
                     </div>
                     <div>
                         <span class="text-sm text-slate-500">Emergency Contact:</span>
-                        <p class="font-medium text-slate-900">${user.patient_profile && user.patient_profile.emergency_contact ? user.patient_profile.emergency_contact : 'Not provided'}</p>
+                        <p class="font-medium text-slate-900">${user.patient_profile.emergency_contact || 'Not provided'}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm text-slate-500">Address:</span>
+                        <p class="font-medium text-slate-900">${user.patient_profile.address || 'Not provided'}</p>
                     </div>
                     <div>
                         <span class="text-sm text-slate-500">Medical History:</span>
-                        <p class="font-medium text-slate-900">${user.patient_profile && user.patient_profile.medical_history ? user.patient_profile.medical_history : 'Not provided'}</p>
+                        <p class="font-medium text-slate-900">${user.patient_profile.medical_history || 'Not provided'}</p>
                     </div>
                     <div>
                         <span class="text-sm text-slate-500">Allergies:</span>
-                        <p class="font-medium text-slate-900">${user.patient_profile && user.patient_profile.allergies ? user.patient_profile.allergies : 'Not provided'}</p>
+                        <p class="font-medium text-slate-900">${user.patient_profile.allergies || 'Not provided'}</p>
                     </div>
                 </div>
             </div>
@@ -614,7 +610,6 @@ function displayUserDetails(user) {
         </div>
     `;
     
-    console.log('Content generated:', content);
     document.getElementById('userDetailsContent').innerHTML = content;
 }
 </script>

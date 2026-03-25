@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
@@ -18,6 +18,7 @@ from appointments.models import Appointment
 from appointments.utils import cancel_expired_pending_appointments
 from prescriptions.models import Prescription
 from billing.models import Bill
+from medical_records.models import MedicalRecord
 import os
 
 def _google_login_enabled():
@@ -460,6 +461,11 @@ def patient_dashboard_view(request):
     except:
         profile = None
     
+    # Get recent medical records (last 5)
+    medical_records = MedicalRecord.objects.filter(
+        patient=request.user
+    ).select_related('doctor').order_by('-created_at')[:5]
+    
     # Calculate statistics
     total_appointments = Appointment.objects.filter(patient=request.user).count()
     completed_appointments = Appointment.objects.filter(patient=request.user, status='completed').count()
@@ -473,6 +479,7 @@ def patient_dashboard_view(request):
         'available_doctors': available_doctors,
         'recent_prescriptions': recent_prescriptions,
         'bills_with_payments': bills_with_payments,
+        'medical_records': medical_records,
         'profile': profile,
         'total_appointments': total_appointments,
         'completed_appointments': completed_appointments,
@@ -508,31 +515,11 @@ def admin_dashboard_view(request):
     except Exception:
         total_revenue = 0
 
-    # Get recent data (bills and prescriptions within last 24 hours)
-    last_24h = timezone.now() - timedelta(hours=24)
-    recent_appointments = Appointment.objects.all().select_related('patient', 'doctor').order_by('-created_at')[:5]
-    recent_prescriptions = Prescription.objects.filter(created_at__gte=last_24h).select_related('patient', 'doctor').order_by('-created_at')[:5]
-    recent_bills = Bill.objects.filter(created_at__gte=last_24h).select_related('patient', 'doctor').order_by('-created_at')[:5]
-    
-    bills_with_payments = []
-    for bill in recent_bills:
-        paid_amount = bill.get_paid_amount()
-        remaining_balance = bill.get_remaining_balance()
-        bills_with_payments.append({
-            'bill': bill,
-            'paid_amount': paid_amount,
-            'remaining_balance': remaining_balance,
-            'is_fully_paid': remaining_balance <= 0
-        })
-
     context = {
         'total_users': total_users,
         'total_doctors': total_doctors,
         'total_patients': total_patients,
         'total_revenue': total_revenue,
-        'recent_appointments': recent_appointments,
-        'recent_prescriptions': recent_prescriptions,
-        'bills_with_payments': bills_with_payments,
         'system_health': 'Healthy',
         'server_uptime': '99.9%',
         'user': request.user,
@@ -590,18 +577,75 @@ def admin_add_user_view(request):
     
     return render(request, 'accounts/admin_add_user.html', {'form': form})
 
-@login_required
-def admin_users_view(request):
-    if not request.user.is_admin:
-        messages.error(request, 'Access denied!')
-        return redirect('accounts:dashboard')
-    
-    users = User.objects.all()
-    return render(request, 'accounts/admin_users_new.html', {'users': users})
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 @login_required
-def admin_dashboard_users_view(request):
-    """Dashboard users page with notification counts"""
+@require_GET
+def admin_user_details_view(request, user_id):
+    """API endpoint to get user details for admin"""
+    if not request.user.is_admin:
+        return JsonResponse({'success': False, 'error': 'Access denied'})
+    
+    try:
+        # Use select_related to fetch profile data efficiently
+        user = User.objects.select_related('doctor_profile', 'patient_profile').get(id=user_id)
+        
+        # Get unread notifications count
+        from notifications.models import Notification
+        unread_notifications = Notification.objects.filter(
+            recipient=user, 
+            is_read=False
+        ).count()
+        
+        # Prepare user data
+        user_data = {
+            'id': user.id,
+            'email': user.email,
+            'full_name': user.get_full_name(),
+            'role': user.role,
+            'is_active': user.is_active,
+            'date_joined': user.date_joined.isoformat(),
+            'last_login': user.last_login.isoformat() if user.last_login else None,
+            'unread_notifications': unread_notifications,
+        }
+        
+        # Add role-specific profile data
+        if user.role == 'doctor':
+            if hasattr(user, 'doctor_profile') and user.doctor_profile:
+                user_data['doctor_profile'] = {
+                    'specialization': user.doctor_profile.specialization,
+                    'license_number': getattr(user.doctor_profile, 'license_number', None),
+                    'experience': getattr(user.doctor_profile, 'experience', None),
+                }
+            else:
+                user_data['doctor_profile'] = None
+        
+        if user.role == 'patient':
+            if hasattr(user, 'patient_profile') and user.patient_profile:
+                user_data['patient_profile'] = {
+                    'date_of_birth': user.patient_profile.date_of_birth.isoformat() if user.patient_profile.date_of_birth else None,
+                    'gender': user.patient_profile.get_gender_display() if user.patient_profile.gender else None,
+                    'blood_group': user.patient_profile.blood_group,
+                    'address': user.patient_profile.address,
+                    'emergency_contact': user.patient_profile.emergency_contact,
+                    'medical_history': user.patient_profile.medical_history,
+                    'allergies': user.patient_profile.allergies,
+                }
+            else:
+                user_data['patient_profile'] = None
+        
+        return JsonResponse({'success': True, 'user': user_data})
+        
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+def admin_users_view(request):
     if not request.user.is_admin:
         messages.error(request, 'Access denied!')
         return redirect('accounts:dashboard')
@@ -618,8 +662,49 @@ def admin_dashboard_users_view(request):
             is_read=False
         ).count()
     
+    # Separate users by role
+    admins = users.filter(role='admin')
+    doctors = users.filter(role='doctor').select_related('doctor_profile')
+    patients = users.filter(role='patient').select_related('patient_profile')
+    
     context = {
         'users': users,
+        'admins': admins,
+        'doctors': doctors,
+        'patients': patients,
+    }
+    
+    return render(request, 'accounts/admin_dashboard_users.html', context)
+
+@login_required
+def admin_dashboard_users_view(request):
+    """Dashboard users page with separated roles"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied!')
+        return redirect('accounts:dashboard')
+    
+    from notifications.models import Notification
+    
+    # Get all users with their notification counts
+    users = User.objects.all()
+    
+    # Add notification count to each user
+    for user in users:
+        user.unread_notifications = Notification.objects.filter(
+            recipient=user, 
+            is_read=False
+        ).count()
+    
+    # Separate users by role
+    admins = users.filter(role='admin')
+    doctors = users.filter(role='doctor').select_related('doctor_profile')
+    patients = users.filter(role='patient').select_related('patient_profile')
+    
+    context = {
+        'users': users,
+        'admins': admins,
+        'doctors': doctors,
+        'patients': patients,
     }
     
     return render(request, 'accounts/admin_dashboard_users.html', context)

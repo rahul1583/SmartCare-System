@@ -65,6 +65,16 @@
                         <div class="text-xs text-indigo-100 mt-1">All appointments</div>
                     </div>
                 </a>
+                <a href="{% url 'medical_records:medical_record_list' %}" 
+                   class="group bg-gradient-to-br from-teal-500 to-teal-600 text-white p-6 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-file-medical text-xl"></i>
+                        </div>
+                        <div class="font-medium">Medical Records</div>
+                        <div class="text-xs text-teal-100 mt-1">Health history</div>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -198,6 +208,67 @@
                                 </div>
                                 <h3 class="text-lg font-medium text-gray-900 mb-2">No prescriptions yet</h3>
                                 <p class="text-gray-600">Your prescriptions will appear here after appointments</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Medical Records -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-4">
+                        <div class="flex justify-between items-center text-white">
+                            <h2 class="text-xl font-bold flex items-center">
+                                <i class="fas fa-file-medical mr-3"></i>Medical Records
+                            </h2>
+                            <a href="{% url 'medical_records:medical_record_list' %}" 
+                               class="text-teal-100 hover:text-white transition-colors flex items-center">
+                                View All
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% if medical_records %}
+                            <div class="space-y-4">
+                                {% for record in medical_records %}
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <h4 class="font-semibold text-gray-900">Dr. {{ record.doctor.get_full_name|default:record.doctor.email }}</h4>
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800">
+                                                        {{ record.created_at|date:"M d, Y" }}
+                                                    </span>
+                                                </div>
+                                                <p class="text-sm text-gray-600 mb-2">
+                                                    <strong>Chief Complaint:</strong> {{ record.chief_complaint|truncatechars:100 }}
+                                                </p>
+                                                <p class="text-sm text-gray-600 mb-2">
+                                                    <strong>Assessment:</strong> {{ record.assessment|truncatechars:100 }}
+                                                </p>
+                                                {% if record.vital_signs %}
+                                                    <div class="flex items-center text-xs text-gray-500 mt-2">
+                                                        <i class="fas fa-heartbeat mr-1"></i>
+                                                        Vital signs recorded
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="ml-4">
+                                                <a href="{% url 'medical_records:medical_record_detail' record.id %}" 
+                                                   class="text-teal-600 hover:text-teal-800 font-medium text-sm">
+                                                    View Details →
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <i class="fas fa-file-medical text-4xl text-gray-300 mb-4"></i>
+                                <h4 class="text-lg font-medium text-gray-600 mb-2">No Medical Records</h4>
+                                <p class="text-gray-500">Your medical records will appear here after appointments</p>
                             </div>
                         {% endif %}
                     </div>
