@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Pay Bill - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Pay Bill #{{ bill.id }}</h1>
+            <p class="text-gray-600">Amount Due: Rs. {{ remaining_balance }}</p>
+        </div>
+        
+        {% if remaining_balance > 0 %}
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-3">Payment Method</h3>
+                    
+                    <div class="space-y-2">
+                        <label class="flex items-center p-2 bg-white rounded border cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="cash" checked class="mr-3">
+                            <span>💵 Cash Payment</span>
+                        </label>
+                        
+                        <label class="flex items-center p-2 bg-white rounded border cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="esewa" class="mr-3">
+                            <span>� eSewa</span>
+                        </label>
+                        
+                        <label class="flex items-center p-2 bg-white rounded border cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="khalti" class="mr-3">
+                            <span>� Khalti</span>
+                        </label>
+                        
+                        <label class="flex items-center p-2 bg-white rounded border cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment_method" value="bank_transfer" class="mr-3">
+                            <span>🏦 Bank Transfer</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- eSewa Details (shown when eSewa is selected) -->
+                <div id="esewaDetails" class="hidden bg-emerald-50 border border-emerald-200 rounded-lg p-4 mt-4">
+                    <h4 class="font-semibold text-emerald-800 mb-3">eSewa Payment Details</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                            <input type="text" name="esewa_name" placeholder="Enter your full name"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                            <input type="tel" name="esewa_phone" placeholder="98XXXXXXXX" maxlength="10"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="bg-emerald-100 border border-emerald-200 rounded p-3">
+                            <p class="text-sm text-emerald-800">
+                                <strong>eSewa Payment:</strong> Enter your name and mobile number as registered in eSewa. 
+                                Your payment will be processed immediately upon submission.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Khalti Details (shown when Khalti is selected) -->
+                <div id="khaltiDetails" class="hidden bg-purple-50 border border-purple-200 rounded-lg p-4 mt-4">
+                    <h4 class="font-semibold text-purple-800 mb-3">Khalti Payment Details</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                            <input type="text" name="khalti_name" placeholder="Enter your full name"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                            <input type="tel" name="khalti_phone" placeholder="98XXXXXXXX" maxlength="10"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="bg-purple-100 border border-purple-200 rounded p-3">
+                            <p class="text-sm text-purple-800">
+                                <strong>Khalti Payment:</strong> Enter your name and mobile number as registered in Khalti. 
+                                Your payment will be processed immediately upon submission.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bank Details (shown when Bank Transfer is selected) -->
+                <div id="bankDetails" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <h4 class="font-semibold text-blue-800 mb-3">Bank Transfer Details</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+                            <select name="bank_name" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Bank</option>
+                                <option value="smartcare_bank">SmartCare Bank</option>
+                                <option value="nabil">NABIL Bank</option>
+                                <option value="nic_asia">NIC Asia Bank</option>
+                                <option value="global_ime">Global IME Bank</option>
+                                <option value="prabhu">Prabhu Bank</option>
+                                <option value="sanima">Sanima Bank</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                            <input type="text" name="bank_account_number" placeholder="Enter bank account number"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Account Holder Name</label>
+                            <input type="text" name="bank_account_holder" placeholder="Enter account holder name"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="bg-blue-100 border border-blue-200 rounded p-3">
+                            <p class="text-sm text-blue-800">
+                                <strong>Bank Transfer:</strong> Select your bank and enter account details. 
+                                Your payment will be processed immediately upon submission.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-6">
+                    <button type="submit" 
+                            class="bg-green-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-green-700 transition-colors text-lg">
+                        💰 Pay Rs. {{ remaining_balance }} Now
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <div class="text-center bg-green-50 border border-green-200 rounded-lg p-6">
+                <div class="text-6xl mb-4">✅</div>
+                <h2 class="text-xl font-bold text-green-800">Bill Already Paid</h2>
+                <p class="text-green-600">This bill has been fully paid.</p>
+            </div>
+        {% endif %}
+        
+        <div class="text-center mt-6">
+            <a href="{% url 'billing:bill_detail' bill.id %}" 
+               class="text-blue-600 hover:text-blue-800 underline">
+                ← Back to Bill Details
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide payment method details
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const esewaDetails = document.getElementById('esewaDetails');
+    const khaltiDetails = document.getElementById('khaltiDetails');
+    const bankDetails = document.getElementById('bankDetails');
+    
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            // Hide all details first
+            if (esewaDetails) esewaDetails.classList.add('hidden');
+            if (khaltiDetails) khaltiDetails.classList.add('hidden');
+            if (bankDetails) bankDetails.classList.add('hidden');
+            
+            // Show relevant details
+            if (this.value === 'esewa' && esewaDetails) {
+                esewaDetails.classList.remove('hidden');
+            } else if (this.value === 'khalti' && khaltiDetails) {
+                khaltiDetails.classList.remove('hidden');
+            } else if (this.value === 'bank_transfer' && bankDetails) {
+                bankDetails.classList.remove('hidden');
+            }
+        });
+    });
+});
+</script>
+
+<style>
+label input[type="radio"]:checked + span {
+    font-weight: bold;
+    color: #059669;
+}
+
+label {
+    transition: all 0.2s ease;
+}
+
+label:hover {
+    background-color: #f3f4f6;
+}
+</style>
+{% endblock %}

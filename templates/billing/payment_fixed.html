@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Complete Payment</h1>
+            <p class="text-gray-600">Choose your payment method and complete the transaction</p>
+        </div>
+        
+        <!-- Bill Information -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bill Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="font-medium text-gray-600">Bill ID:</span>
+                    <span class="text-gray-800 ml-2">#{{ bill.id }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Total Amount:</span>
+                    <span class="text-gray-800 ml-2">Rs. {{ bill.total_amount }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Remaining Balance:</span>
+                    <span class="text-gray-800 ml-2 font-semibold text-green-600">Rs. {{ remaining_balance }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Status:</span>
+                    <span class="text-gray-800 ml-2">{{ bill.get_status_display }}</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if remaining_balance > 0 %}
+            <!-- Payment Method Selection -->
+            <form method="post" id="paymentForm" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Hidden Payment Method Field -->
+                <input type="hidden" name="payment_method" id="payment_method" value="cash">
+                
+                <!-- Payment Method Options -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Select Payment Method</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Cash Option -->
+                        <div class="payment-option bg-green-50 border-2 border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100 transition-all duration-200"
+                             onclick="selectPaymentMethod('cash')">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-money-bill-wave text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Cash Payment</h4>
+                                <p class="text-sm text-gray-600 mt-1">Pay with cash</p>
+                            </div>
+                        </div>
+                        
+                        <!-- eSewa Option -->
+                        <div class="payment-option bg-emerald-50 border-2 border-emerald-200 rounded-lg p-4 cursor-pointer hover:bg-emerald-100 transition-all duration-200"
+                             onclick="selectPaymentMethod('esewa')">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-wallet text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">eSewa</h4>
+                                <p class="text-sm text-gray-600 mt-1">Digital wallet</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Khalti Option -->
+                        <div class="payment-option bg-purple-50 border-2 border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition-all duration-200"
+                             onclick="selectPaymentMethod('khalti')">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-mobile-alt text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Khalti</h4>
+                                <p class="text-sm text-gray-600 mt-1">Mobile payment</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Bank Transfer Option -->
+                        <div class="payment-option bg-blue-50 border-2 border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition-all duration-200"
+                             onclick="selectPaymentMethod('bank_transfer')">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-university text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Bank Transfer</h4>
+                                <p class="text-sm text-gray-600 mt-1">Bank deposit</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Amount Input -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Amount</h3>
+                    <div>
+                        <label for="amount" class="block text-gray-700 text-sm font-medium mb-2">
+                            Amount <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rs.</span>
+                            <input type="number" name="amount" id="amount" required
+                                   step="0.01" min="0" max="{{ remaining_balance }}"
+                                   value="{{ remaining_balance }}"
+                                   placeholder="0.00"
+                                   class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">Maximum: Rs. {{ remaining_balance }}</p>
+                    </div>
+                </div>
+                
+                <!-- Payment Method Specific Fields -->
+                <div id="paymentMethodFields" class="hidden">
+                    <!-- eSewa Fields -->
+                    <div id="esewaFields" class="form-section bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">eSewa Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-1">
+                                    Registered Name
+                                </label>
+                                <input type="text" name="esewa_name" id="esewa_name"
+                                       placeholder="Full name as registered in eSewa"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-1">
+                                    Mobile Number
+                                </label>
+                                <input type="tel" name="esewa_phone" id="esewa_phone"
+                                       placeholder="98XXXXXXXX"
+                                       maxlength="10"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Khalti Fields -->
+                    <div id="khaltiFields" class="form-section bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Khalti Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-1">
+                                    Registered Name
+                                </label>
+                                <input type="text" name="khalti_name" id="khalti_name"
+                                       placeholder="Full name as registered in Khalti"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-1">
+                                    Mobile Number
+                                </label>
+                                <input type="tel" name="khalti_phone" id="khalti_phone"
+                                       placeholder="98XXXXXXXX"
+                                       maxlength="10"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bank Transfer Fields -->
+                    <div id="bank_transferFields" class="form-section bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Bank Transfer Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-1">
+                                    Bank Name
+                                </label>
+                                <select name="bank_name" id="bank_name"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Bank</option>
+                                    <option value="smartcare_bank">SmartCare Bank</option>
+                                    <option value="nabil">NABIL Bank</option>
+                                    <option value="nic_asia">NIC Asia Bank</option>
+                                    <option value="global_ime">Global IME Bank</option>
+                                    <option value="prabhu">Prabhu Bank</option>
+                                    <option value="sanima">Sanima Bank</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-1">
+                                    Account Number
+                                </label>
+                                <input type="text" name="bank_account_number" id="bank_account_number"
+                                       placeholder="Enter bank account number"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-1">
+                                    Account Holder Name
+                                </label>
+                                <input type="text" name="bank_account_holder" id="bank_account_holder"
+                                       placeholder="Enter account holder name"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="flex justify-center">
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <i class="fas fa-lock"></i>
+                        Process Payment
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <!-- Payment Complete -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-green-600 text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Payment Complete</h2>
+                <p class="text-gray-600 mb-6">This bill has been fully paid. No further payment is required.</p>
+                <a href="{% url 'billing:bill_detail' bill.id %}" 
+                   class="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors inline-flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Bill
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function selectPaymentMethod(method) {
+    console.log('DEBUG: Selecting payment method:', method);
+    
+    // Set hidden field value
+    document.getElementById('payment_method').value = method;
+    
+    // Remove selected class from all options
+    document.querySelectorAll('.payment-option').forEach(opt => {
+        opt.classList.remove('ring-2', 'ring-blue-500', 'ring-emerald-500', 'ring-purple-500', 'ring-blue-500');
+    });
+    
+    // Add selected class to clicked option
+    const selectedOption = event.currentTarget;
+    if (method === 'cash') {
+        selectedOption.classList.add('ring-2', 'ring-green-500');
+    } else if (method === 'esewa') {
+        selectedOption.classList.add('ring-2', 'ring-emerald-500');
+    } else if (method === 'khalti') {
+        selectedOption.classList.add('ring-2', 'ring-purple-500');
+    } else if (method === 'bank_transfer') {
+        selectedOption.classList.add('ring-2', 'ring-blue-500');
+    }
+    
+    // Show/hide method-specific fields
+    const methodFields = document.getElementById('paymentMethodFields');
+    const allFieldSections = methodFields.querySelectorAll('[id$="Fields"]');
+    
+    // Hide all field sections
+    allFieldSections.forEach(section => section.classList.add('hidden'));
+    
+    // Show relevant fields
+    const targetFields = document.getElementById(method + 'Fields');
+    if (targetFields) {
+        methodFields.classList.remove('hidden');
+        targetFields.classList.remove('hidden');
+    }
+    
+    console.log('DEBUG: Payment method selected:', method);
+    console.log('DEBUG: Hidden field value:', document.getElementById('payment_method').value);
+}
+
+// Auto-select cash on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DEBUG: Page loaded, auto-selecting cash payment');
+    selectPaymentMethod('cash');
+});
+
+// Form submission
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    console.log('DEBUG: Form submitting...');
+    
+    const paymentMethod = document.getElementById('payment_method').value;
+    const amount = document.getElementById('amount').value;
+    
+    console.log('DEBUG: Final payment method:', paymentMethod);
+    console.log('DEBUG: Final amount:', amount);
+    
+    // Ensure payment method is selected
+    if (!paymentMethod) {
+        console.log('DEBUG: No payment method selected, using cash');
+        document.getElementById('payment_method').value = 'cash';
+    }
+    
+    // Ensure amount is valid
+    if (!amount || parseFloat(amount) <= 0) {
+        console.log('DEBUG: Invalid amount, using remaining balance');
+        document.getElementById('amount').value = '{{ remaining_balance }}';
+    }
+    
+    return true; // Allow form submission
+});
+</script>
+{% endblock %}

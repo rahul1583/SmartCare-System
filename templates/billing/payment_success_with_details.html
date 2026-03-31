@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Successful - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-green-600 text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h1>
+            <p class="text-gray-600">Your payment has been processed successfully. Thank you for your payment!</p>
+        </div>
+        
+        <!-- Payment Details -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-info-circle mr-2"></i>Payment Details
+            </h2>
+            
+            <!-- Payment Method and Time - Prominently Displayed -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <div class="text-blue-600 text-sm font-medium mb-1">Payment Method Used</div>
+                        <div class="text-2xl font-bold text-blue-800">{{ method_display }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-blue-600 text-sm font-medium mb-1">Payment Time</div>
+                        <div class="text-2xl font-bold text-blue-800">{{ payment_time }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Payment Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="font-medium text-gray-600">Transaction ID:</span>
+                    <span class="text-gray-800 ml-2">{{ transaction_id }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Payment Date:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.paid_date|date:"F d, Y" }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Amount Paid:</span>
+                    <span class="text-gray-800 ml-2">Rs. {{ amount }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Payment Status:</span>
+                    <span class="text-green-600 ml-2 font-semibold">Completed</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Payment Type:</span>
+                    <span class="text-gray-800 ml-2">Bill Payment</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Bill ID:</span>
+                    <span class="text-gray-800 ml-2">#{{ payment.bill.id }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Patient Name:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.bill.patient.get_full_name|default:payment.bill.patient.email }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Doctor Name:</span>
+                    <span class="text-gray-800 ml-2">{{ payment.bill.doctor.get_full_name|default:payment.bill.doctor.email }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Payment Notes:</span>
+                    <span class="text-gray-800 ml-2 text-sm">{{ payment.notes|default:"Standard payment" }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Confirmation Sent:</span>
+                    <span class="text-gray-800 ml-2">Yes - {{ payment.paid_date|date:"g:i A" }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Method Specific Message -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-2">Payment Confirmation</h3>
+            <p class="text-blue-700">
+                {% if method_display == 'Cash Payment' %}
+                    Your cash payment has been recorded successfully. Please keep your receipt for future reference.
+                {% elif method_display == 'eSewa Digital Wallet' %}
+                    Your eSewa payment has been processed successfully. You will receive a confirmation message from eSewa.
+                {% elif method_display == 'Khalti Mobile Payment' %}
+                    Your Khalti payment has been processed successfully. You will receive a confirmation message from Khalti.
+                {% elif method_display == 'Bank Transfer' %}
+                    Your bank transfer has been recorded successfully. Please keep your transaction receipt for verification.
+                {% else %}
+                    Your payment has been processed successfully. Thank you for choosing SmartCare System.
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Payment Receipt -->
+        <div class="bg-white border-2 border-gray-300 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-receipt mr-2"></i>Payment Receipt
+            </h3>
+            <div class="border-b-2 border-gray-200 pb-4 mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-lg font-bold text-gray-800">SmartCare System</h4>
+                    <span class="text-sm text-gray-600">Medical Billing System</span>
+                </div>
+                <div class="text-center text-gray-600 text-sm">
+                    123 Medical Street, Kathmandu, Nepal<br>
+                    Phone: +977-1-2345678 | Email: info@smartcare.com
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h5 class="font-semibold text-gray-700 mb-2">Billed To:</h5>
+                    <div class="space-y-1">
+                        <p class="text-gray-800"><strong>{{ payment.bill.patient.get_full_name|default:payment.bill.patient.email }}</strong></p>
+                        <p class="text-sm text-gray-600">{{ payment.bill.patient.email }}</p>
+                        <p class="text-sm text-gray-600">{{ payment.bill.patient.phone|default:"Not provided" }}</p>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-gray-700 mb-2">Payment Information:</h5>
+                    <div class="space-y-1">
+                        <p class="text-gray-800"><strong>Receipt #:</strong> {{ transaction_id }}</p>
+                        <p class="text-gray-800"><strong>Date:</strong> {{ payment.paid_date|date:"F d, Y" }}</p>
+                        <p class="text-gray-800"><strong>Time:</strong> {{ payment_time }}</p>
+                        <p class="text-gray-800"><strong>Method:</strong> {{ method_display }}</p>
+                        <p class="text-gray-800"><strong>Status:</strong> <span class="text-green-600">Completed</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t-2 border-gray-200 pt-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-semibold text-gray-700">Total Amount Paid:</span>
+                    <span class="text-2xl font-bold text-green-600">Rs. {{ amount }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex justify-center space-x-4">
+            <button onclick="window.print()" 
+                    class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors flex items-center">
+                <i class="fas fa-print mr-2"></i>Print Receipt
+            </button>
+            <a href="{% url 'appointments:appointment_list' %}" 
+               class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors flex items-center">
+                <i class="fas fa-calendar-alt mr-2"></i>My Appointments
+            </a>
+            <a href="{% url 'billing:payment_history' %}" 
+               class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors flex items-center">
+                <i class="fas fa-history mr-2"></i>Payment History
+            </a>
+            <a href="{% url 'accounts:patient_dashboard' %}" 
+               class="bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700 transition-colors flex items-center">
+                <i class="fas fa-home mr-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

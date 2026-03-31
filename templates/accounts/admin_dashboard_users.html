@@ -48,27 +48,7 @@
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-2xl shadow-lg p-8 border border-emerald-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
-            <div class="flex items-center justify-between mb-6">
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-2xl shadow-lg">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </div>
-                <div class="text-right">
-                    <div class="text-4xl font-bold text-gray-800">{{ doctors|length }}</div>
-                    <div class="text-blue-600 font-semibold">Doctors</div>
-                </div>
-            </div>
-            <div class="bg-blue-50 rounded-xl p-4">
-                <div class="flex items-center justify-between">
-                    <span class="text-blue-700 font-medium">Medical Staff</span>
-                    <span class="text-2xl">👨‍⚕️</span>
-                </div>
-            </div>
-        </div>
-
+        
         <div class="bg-white rounded-2xl shadow-lg p-8 border border-emerald-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
             <div class="flex items-center justify-between mb-6">
                 <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 p-4 rounded-2xl shadow-lg">
@@ -83,233 +63,82 @@
             </div>
             <div class="bg-emerald-50 rounded-xl p-4">
                 <div class="flex items-center justify-between">
-                    <span class="text-emerald-700 font-medium">Care Recipients</span>
-                    <span class="text-2xl">👥</span>
+                    <span class="text-emerald-700 font-medium">Healthcare</span>
+                    <span class="text-2xl">🏥</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Search and Controls -->
-    <div class="bg-white rounded-2xl shadow-lg p-6 mb-10 border border-emerald-100">
-        <div class="flex flex-col lg:flex-row gap-6 items-center">
-            <div class="flex-1 relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </div>
-                <input type="text" 
-                       id="userSearch" 
-                       placeholder="Search users by name, email, or ID..." 
-                       class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-700 placeholder-gray-400">
-            </div>
-            <div class="flex gap-4">
-                <select id="roleFilter" class="px-6 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-700">
-                    <option value="">All Roles</option>
-                    <option value="admin">👑 Administrators</option>
-                    <option value="doctor">👨‍⚕️ Doctors</option>
-                    <option value="patient">👥 Patients</option>
-                </select>
-                <button class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-8 py-4 rounded-2xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Add User
+    <!-- Today's Appointments -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-blue-100">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-blue-800 flex items-center gap-3">
+                    <span class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
+                        <i class="fas fa-calendar-day text-blue-600"></i>
                     </span>
-                </button>
+                    Today's Appointments
+                </h3>
+                <p class="text-blue-100 mt-2">Scheduled appointments for today</p>
             </div>
-        </div>
-    </div>
-
-    <!-- Administrators Section -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-10 border border-purple-100" data-role="admin">
-        <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-8 py-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-                        <span class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                            </svg>
-                        </span>
-                        System Administrators
-                    </h3>
-                    <p class="text-purple-100 mt-2">Full system access and control privileges</p>
-                </div>
-                <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
-                    <span class="text-white font-semibold">{{ admins|length }} Total</span>
-                </div>
+            <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
+                <span class="text-white font-semibold">{{ today_appointments|length }} Today</span>
             </div>
         </div>
         
-        {% if admins %}
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-purple-50 border-b border-purple-200">
-                        <tr>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">User Details</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">Contact</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">Status</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">Activity</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-purple-700 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-purple-100">
-                        {% for user in admins %}
-                            <tr class="hover:bg-purple-50 transition-colors duration-200">
-                                <td class="px-8 py-6">
-                                    <div class="flex items-center">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-lg">
-                                            {{ user.get_full_name|make_list|first|upper|default:user.email|make_list|first|upper }}
-                                        </div>
-                                        <div>
-                                            <div class="font-bold text-gray-900 text-lg">{{ user.get_full_name|default:user.email }}</div>
-                                            <div class="text-sm text-purple-600 font-medium">ID: #{{ user.id }} • Administrator</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    <div class="text-gray-800 font-medium">{{ user.email }}</div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    {% if user.is_active %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800 border-2 border-green-200">
-                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                            Active
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-800 border-2 border-red-200">
-                                            <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                                            Inactive
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="px-8 py-6">
-                                    {% if user.unread_notifications > 0 %}
-                                        <span class="inline-flex items-center justify-center px-3 py-2 rounded-xl text-sm font-bold bg-red-500 text-white shadow-lg min-w-[3rem]">
-                                            {{ user.unread_notifications }}
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex items-center justify-center px-3 py-2 rounded-xl text-sm font-bold bg-gray-200 text-gray-600 min-w-[3rem]">
-                                            0
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="px-8 py-6">
-                                    <button onclick="showUserDetails({{ user.id }})" 
-                                            class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                                        View Profile
-                                    </button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="text-center py-16">
-                <div class="w-20 h-20 bg-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                </div>
-                <h4 class="text-xl font-bold text-purple-700 mb-2">No Administrators Found</h4>
-                <p class="text-purple-500">System administrators will appear here once created</p>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Doctors Section -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-10 border border-blue-100" data-role="doctor">
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-                        <span class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                        </span>
-                        Medical Doctors
-                    </h3>
-                    <p class="text-blue-100 mt-2">Healthcare professionals and medical practitioners</p>
-                </div>
-                <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
-                    <span class="text-white font-semibold">{{ doctors|length }} Total</span>
-                </div>
-            </div>
-        </div>
-        
-        {% if doctors %}
+        {% if today_appointments %}
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-blue-50 border-b border-blue-200">
                         <tr>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">User Details</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Contact</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Specialization</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Status</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Activity</th>
-                            <th class="px-8 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Time</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Doctor</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-blue-100">
-                        {% for user in doctors %}
+                        {% for appointment in today_appointments %}
                             <tr class="hover:bg-blue-50 transition-colors duration-200">
                                 <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                                </td>
+                                <td class="px-8 py-6">
                                     <div class="flex items-center">
-                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-lg">
-                                            {{ user.get_full_name|make_list|first|upper|default:user.email|make_list|first|upper }}
+                                        <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-lg">
+                                            {{ appointment.patient.get_full_name|make_list|first|upper|default:appointment.patient.email|make_list|first|upper }}
                                         </div>
                                         <div>
-                                            <div class="font-bold text-gray-900 text-lg">{{ user.get_full_name|default:user.email }}</div>
-                                            <div class="text-sm text-blue-600 font-medium">ID: #{{ user.id }} • Doctor</div>
+                                            <div class="font-bold text-gray-900 text-lg">{{ appointment.patient.get_full_name|default:appointment.patient.email }}</div>
+                                            <div class="text-sm text-blue-600 font-medium">{{ appointment.patient.email }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <div class="text-gray-800 font-medium">{{ user.email }}</div>
+                                    <div class="text-gray-800 font-medium">{{ appointment.doctor.get_full_name|default:appointment.doctor.email }}</div>
                                 </td>
                                 <td class="px-8 py-6">
-                                    {% if user.doctor_profile.specialization %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-blue-100 text-blue-800 border-2 border-blue-200">
-                                            {{ user.doctor_profile.specialization }}
-                                        </span>
-                                    {% else %}
-                                        <span class="text-blue-400 text-sm font-medium">Not specified</span>
-                                    {% endif %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border-2 border-blue-200">
+                                        {{ appointment.appointment_type|default:"General" }}
+                                    </span>
                                 </td>
                                 <td class="px-8 py-6">
-                                    {% if user.is_active %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800 border-2 border-green-200">
-                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                            Active
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-800 border-2 border-red-200">
-                                            <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                                            Inactive
-                                        </span>
-                                    {% endif %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {% if appointment.status == 'confirmed' %}bg-green-100 text-green-800 border-2 border-green-200{% elif appointment.status == 'pending' %}bg-yellow-100 text-yellow-800 border-2 border-yellow-200{% else %}bg-gray-100 text-gray-800 border-2 border-gray-200{% endif %}">
+                                        {{ appointment.status|title }}
+                                    </span>
                                 </td>
                                 <td class="px-8 py-6">
-                                    {% if user.unread_notifications > 0 %}
-                                        <span class="inline-flex items-center justify-center px-3 py-2 rounded-xl text-sm font-bold bg-red-500 text-white shadow-lg min-w-[3rem]">
-                                            {{ user.unread_notifications }}
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex items-center justify-center px-3 py-2 rounded-xl text-sm font-bold bg-gray-200 text-gray-600 min-w-[3rem]">
-                                            0
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td class="px-8 py-6">
-                                    <button onclick="showUserDetails({{ user.id }})" 
-                                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                                        View Profile
-                                    </button>
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'appointments:detail' appointment.id %}" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                            <i class="fas fa-eye mr-1"></i>View
+                                        </a>
+                                        <a href="{% url 'appointments:edit' appointment.id %}" class="text-blue-100 text-blue-700 hover:text-blue-600 font-medium text-sm">
+                                            <i class="fas fa-edit mr-1"></i>Edit
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -319,14 +148,285 @@
         {% else %}
             <div class="text-center py-16">
                 <div class="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
+                    <i class="fas fa-calendar-day text-blue-400 text-5xl"></i>
                 </div>
-                <h4 class="text-xl font-bold text-blue-700 mb-2">No Doctors Found</h4>
-                <p class="text-blue-500">Medical practitioners will appear here once registered</p>
+                <h4 class="text-xl font-bold text-blue-700 mb-2">No Appointments Today</h4>
+                <p class="text-blue-500">No appointments scheduled for today</p>
             </div>
         {% endif %}
+    </div>
+
+    <!-- Today's Bills -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-green-100">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-green-800 flex items-center gap-3">
+                    <span class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
+                        <i class="fas fa-file-invoice-dollar text-green-600"></i>
+                    </span>
+                    Today's Bills
+                </h3>
+                <p class="text-green-100 mt-2">Bills generated today</p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
+                <span class="text-white font-semibold">{{ today_bills|length }} Today</span>
+            </div>
+        </div>
+        
+        {% if today_bills %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-green-50 border-b border-green-200">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-green-700 uppercase tracking-wider">Bill ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-green-700 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-green-700 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-green-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-green-700 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-green-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-green-100">
+                        {% for bill in today_bills %}
+                            <tr class="hover:bg-green-50 transition-colors duration-200">
+                                <td class="px-8 py-6">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-lg">
+                                        #{{ bill.id }}
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">{{ bill.patient.get_full_name|default:bill.patient.email }}</div>
+                                    <div class="text-sm text-green-600">{{ bill.patient.email }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">Rs. {{ bill.total_amount }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {% if bill.status == 'paid' %}bg-green-100 text-green-800 border-2 border-green-200{% elif bill.status == 'pending' %}bg-yellow-100 text-yellow-800 border-2 border-yellow-200{% else %}bg-red-100 text-red-800 border-2 border-red-200{% endif %}">
+                                        {{ bill.status|title }}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">{{ bill.created_at|date:"F d, Y" }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'billing:bill_detail' bill.id %}" class="text-green-600 hover:text-green-800 font-medium text-sm">
+                                            <i class="fas fa-eye mr-1"></i>View
+                                        </a>
+                                        {% if bill.status != 'paid' %}
+                                            <a href="{% url 'billing:pay' bill.id %}" class="text-green-100 text-green-700 hover:text-green-600 font-medium text-sm">
+                                                <i class="fas fa-credit-card mr-1"></i>Pay
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-16">
+                <div class="w-20 h-20 bg-green-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-file-invoice-dollar text-green-400 text-5xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-green-700 mb-2">No Bills Today</h4>
+                <p class="text-green-500">No bills generated today</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Appointments -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-orange-100">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-orange-800 flex items-center gap-3">
+                    <span class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
+                        <i class="fas fa-calendar-check text-orange-600"></i>
+                    </span>
+                    Recent Appointments
+                </h3>
+                <p class="text-orange-100 mt-2">Latest medical appointments and consultations</p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
+                <span class="text-white font-semibold">{{ recent_appointments|length }} Total</span>
+            </div>
+        </div>
+        
+        {% if recent_appointments %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-orange-50 border-b border-orange-200">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">Doctor</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">Time</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-orange-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-orange-100">
+                        {% for appointment in recent_appointments %}
+                            <tr class="hover:bg-orange-50 transition-colors duration-200">
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-lg">
+                                            {{ appointment.patient.get_full_name|make_list|first|upper|default:appointment.patient.email|make_list|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-gray-900 text-lg">{{ appointment.patient.get_full_name|default:appointment.patient.email }}</div>
+                                            <div class="text-sm text-orange-600 font-medium">{{ appointment.patient.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">{{ appointment.doctor.get_full_name|default:appointment.doctor.email }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">{{ appointment.appointment_date|date:"F d, Y" }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">{{ appointment.appointment_time|time:"g:i A" }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border-2 border-orange-200">
+                                        {{ appointment.status|title }}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'appointments:detail' appointment.id %}" class="text-orange-600 hover:text-orange-800 font-medium text-sm">
+                                            <i class="fas fa-eye mr-1"></i>View
+                                        </a>
+                                        <a href="{% url 'appointments:edit' appointment.id %}" class="text-orange-100 text-orange-700 hover:text-orange-600 font-medium text-sm">
+                                            <i class="fas fa-edit mr-1"></i>Edit
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-16">
+                <div class="w-20 h-20 bg-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-calendar-check text-orange-400 text-5xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-orange-700 mb-2">No Recent Appointments</h4>
+                <p class="text-orange-500">Appointments will appear here once scheduled</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Bills -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-indigo-100">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-indigo-800 flex items-center gap-3">
+                    <span class="bg-white/20 backdrop-blur-sm p-2 rounded-xl">
+                        <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
+                    </span>
+                    Recent Bills
+                </h3>
+                <p class="text-indigo-100 mt-2">Latest billing and payment records</p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
+                <span class="text-white font-semibold">{{ recent_bills|length }} Total</span>
+            </div>
+        </div>
+        
+        {% if recent_bills %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-indigo-50 border-b border-indigo-200">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Bill ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-indigo-100">
+                        {% for bill in recent_bills %}
+                            <tr class="hover:bg-indigo-50 transition-colors duration-200">
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-lg">
+                                            #{{ bill.id }}
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-gray-900 text-lg">{{ bill.patient.get_full_name|default:bill.patient.email }}</div>
+                                            <div class="text-sm text-indigo-600 font-medium">{{ bill.patient.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">Rs. {{ bill.total_amount }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border-2 border-indigo-200">
+                                        {{ bill.status|title }}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-gray-800 font-medium">{{ bill.created_at|date:"F d, Y" }}</div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'billing:bill_detail' bill.id %}" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                                            <i class="fas fa-eye mr-1"></i>View
+                                        </a>
+                                        {% if bill.status != 'paid' %}
+                                            <a href="{% url 'billing:pay' bill.id %}" class="text-indigo-100 text-indigo-700 hover:text-indigo-600 font-medium text-sm">
+                                                <i class="fas fa-credit-card mr-1"></i>Pay
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-16">
+                <div class="w-20 h-20 bg-indigo-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-file-invoice-dollar text-indigo-400 text-5xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-indigo-700 mb-2">No Recent Bills</h4>
+                <p class="text-indigo-500">Bills will appear here once generated</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex-1">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search users by name, email, or ID..." 
+                           class="w-full px-6 py-4 pr-12 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-700">
+                    <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <select id="roleFilter" class="px-6 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all duration-200 text-gray-700">
+                    <option value="">All Roles</option>
+                    <option value="admin">👑 Administrators</option>
+                    <option value="patient">👥 Patients</option>
+                </select>
+                <button class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-8 py-4 rounded-2xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <i class="fas fa-plus mr-2"></i>Add User
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Patients Section -->
@@ -357,6 +457,7 @@
                         <tr>
                             <th class="px-8 py-4 text-left text-xs font-bold text-emerald-700 uppercase tracking-wider">User Details</th>
                             <th class="px-8 py-4 text-left text-xs font-bold text-emerald-700 uppercase tracking-wider">Contact</th>
+                            <th class="px-8 py-4 text-left text-xs font-bold text-emerald-700 uppercase tracking-wider">Medical Info</th>
                             <th class="px-8 py-4 text-left text-xs font-bold text-emerald-700 uppercase tracking-wider">Emergency</th>
                             <th class="px-8 py-4 text-left text-xs font-bold text-emerald-700 uppercase tracking-wider">Status</th>
                             <th class="px-8 py-4 text-left text-xs font-bold text-emerald-700 uppercase tracking-wider">Activity</th>
@@ -374,50 +475,93 @@
                                         <div>
                                             <div class="font-bold text-gray-900 text-lg">{{ user.get_full_name|default:user.email }}</div>
                                             <div class="text-sm text-emerald-600 font-medium">ID: #{{ user.id }} • Patient</div>
+                                            {% if user.patient_profile.age %}
+                                                <div class="text-xs text-gray-500">Age: {{ user.patient_profile.age }}</div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-8 py-6">
                                     <div class="text-gray-800 font-medium">{{ user.email }}</div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    {% if user.patient_profile.emergency_contact %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 border-2 border-emerald-200">
-                                            📞 {{ user.patient_profile.emergency_contact }}
-                                        </span>
-                                    {% else %}
-                                        <span class="text-emerald-400 text-sm font-medium">Not provided</span>
+                                    {% if user.patient_profile.phone %}
+                                        <div class="text-sm text-emerald-600 mt-1">{{ user.patient_profile.phone }}</div>
                                     {% endif %}
                                 </td>
                                 <td class="px-8 py-6">
-                                    {% if user.is_active %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800 border-2 border-green-200">
-                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                            Active
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-800 border-2 border-red-200">
-                                            <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                                            Inactive
-                                        </span>
-                                    {% endif %}
+                                    <div class="text-gray-800 font-medium">
+                                        {% if user.patient_profile.blood_type %}
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-emerald-100 text-emerald-800">
+                                                Blood: {{ user.patient_profile.blood_type }}
+                                            </span>
+                                        {% endif %}
+                                        {% if user.patient_profile.allergies %}
+                                            <div class="text-xs text-orange-600 mt-1">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                Allergies: {{ user.patient_profile.allergies|truncatechars:30 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td class="px-8 py-6">
-                                    {% if user.unread_notifications > 0 %}
-                                        <span class="inline-flex items-center justify-center px-3 py-2 rounded-xl text-sm font-bold bg-red-500 text-white shadow-lg min-w-[3rem]">
-                                            {{ user.unread_notifications }}
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex items-center justify-center px-3 py-2 rounded-xl text-sm font-bold bg-gray-200 text-gray-600 min-w-[3rem]">
-                                            0
-                                        </span>
-                                    {% endif %}
+                                    <div class="text-gray-800 font-medium">
+                                        {% if user.patient_profile.emergency_contact %}
+                                            <div class="text-sm">{{ user.patient_profile.emergency_contact }}</div>
+                                            {% if user.patient_profile.emergency_phone %}
+                                                <div class="text-xs text-emerald-600">{{ user.patient_profile.emergency_phone }}</div>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-gray-400">Not provided</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td class="px-8 py-6">
-                                    <button onclick="showUserDetails({{ user.id }})" 
-                                            class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                                        View Profile
-                                    </button>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {% if user.is_active %}bg-green-100 text-green-800 border-2 border-green-200{% else %}bg-red-100 text-red-800 border-2 border-red-200{% endif %}">
+                                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="text-sm text-gray-600">
+                                        <div class="flex items-center mb-1">
+                                            <svg class="w-4 h-4 text-green-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                            </svg>
+                                            Last active: {{ user.last_login|date:"F d, Y" }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">Member since: {{ user.date_joined|date:"M Y" }}</div>
+                                        {% if user.patient_profile.last_visit %}
+                                            <div class="text-xs text-blue-600 mt-1">
+                                                <i class="fas fa-hospital mr-1"></i>
+                                                Last visit: {{ user.patient_profile.last_visit|date:"M d, Y" }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="displayUserDetails({{ user.id }}, '{{ user.get_full_name|default:user.email }}', '{{ user.email }}', '{{ user.role }}', 'Patient', '{{ user.is_active|yesno:\"Active\":\"Inactive\" }}', '{{ user.last_login|date:\"F d, Y\" }}', '{{ user.date_joined|date:\"M Y\" }}')" 
+                                                class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">
+                                            <i class="fas fa-eye mr-1"></i>View
+                                        </button>
+                                        <button onclick="editUser({{ user.id }})" 
+                                                class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg hover:bg-emerald-200 transition-colors text-sm font-medium">
+                                            <i class="fas fa-edit mr-1"></i>Edit
+                                        </button>
+                                        <button onclick="resetPassword({{ user.id }})" 
+                                                class="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium">
+                                            <i class="fas fa-key mr-1"></i>Reset
+                                        </button>
+                                        {% if not user.is_active %}
+                                            <button onclick="activateUser({{ user.id }})" 
+                                                    class="bg-green-100 text-green-700 px-4 py-2 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium">
+                                                <i class="fas fa-check mr-1"></i>Activate
+                                            </button>
+                                        {% else %}
+                                            <button onclick="deactivateUser({{ user.id }})" 
+                                                    class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium">
+                                                <i class="fas fa-ban mr-1"></i>Deactivate
+                                            </button>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -432,264 +576,206 @@
                     </svg>
                 </div>
                 <h4 class="text-xl font-bold text-emerald-700 mb-2">No Patients Found</h4>
-                <p class="text-emerald-500">Patients will appear here once registered in the system</p>
+                <p class="text-emerald-500">Patients will appear here once registered</p>
+                <button onclick="location.href='{% url 'accounts:register' %}'" 
+                        class="bg-emerald-600 text-white px-6 py-3 rounded-md hover:bg-emerald-700 transition-colors">
+                    <i class="fas fa-user-plus mr-2"></i>Register First Patient
+                </button>
             </div>
         {% endif %}
     </div>
 </div>
 
-<!-- Modern User Details Modal -->
-<div id="userDetailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen px-4 py-8">
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeUserDetails()"></div>
-        
-        <div class="relative bg-white rounded-3xl max-w-4xl w-full mx-auto shadow-2xl transform transition-all">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-6 rounded-t-3xl">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        User Profile Details
-                    </h3>
-                    <button onclick="closeUserDetails()" class="bg-white/20 backdrop-blur-sm p-2 rounded-xl hover:bg-white/30 transition-colors">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="px-8 py-8">
-                <div id="userDetailsContent">
-                    <!-- User details will be loaded here -->
-                </div>
-            </div>
-            
-            <div class="px-8 py-6 bg-gray-50 rounded-b-3xl flex justify-end">
-                <button onclick="closeUserDetails()" 
-                        class="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-8 py-3 rounded-xl font-semibold hover:from-gray-700 hover:to-gray-800 transition-all duration-200 shadow-lg">
-                    Close Profile
+<!-- User Details Modal -->
+<div id="userDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-6 rounded-t-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-2xl font-bold text-white">User Details</h3>
+                <button onclick="closeUserDetails()" class="text-white hover:text-emerald-200 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                 </button>
             </div>
+        </div>
+        <div id="userDetailsContent" class="p-8">
+            <!-- User details will be populated here -->
         </div>
     </div>
 </div>
 
 <script>
-// Search functionality
-document.getElementById('userSearch').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const allRows = document.querySelectorAll('tbody tr');
-    
-    allRows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm) ? '' : 'none';
-    });
-});
-
-// Role filter functionality
-document.getElementById('roleFilter').addEventListener('change', function(e) {
-    const selectedRole = e.target.value;
+// Enhanced filtering and search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const roleFilter = document.getElementById('roleFilter');
     const allSections = document.querySelectorAll('[data-role]');
     
-    allSections.forEach(section => {
-        if (selectedRole === '' || section.dataset.role === selectedRole) {
-            section.style.display = 'block';
-        } else {
-            section.style.display = 'none';
-        }
-    });
+    function filterUsers() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedRole = roleFilter.value;
+        
+        allSections.forEach(section => {
+            const sectionRole = section.getAttribute('data-role');
+            const shouldShow = (!selectedRole || sectionRole === selectedRole) && 
+                            (!searchTerm || section.textContent.toLowerCase().includes(searchTerm));
+            
+            section.style.display = shouldShow ? 'block' : 'none';
+        });
+    }
+    
+    searchInput.addEventListener('input', filterUsers);
+    roleFilter.addEventListener('change', filterUsers);
+    
+    // Initialize filters
+    filterUsers();
 });
 
-// User details modal functionality
-function showUserDetails(userId) {
-    fetch(`/accounts/admin/users/${userId}/details/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayUserDetails(data.user);
-                document.getElementById('userDetailsModal').classList.remove('hidden');
-            } else {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while fetching user details');
-        });
-}
-
-function closeUserDetails() {
-    document.getElementById('userDetailsModal').classList.add('hidden');
-}
-
-function displayUserDetails(user) {
+function displayUserDetails(userId, fullName, email, role, userType, isActive, lastLogin, dateJoined) {
+    const modal = document.getElementById('userDetailsModal');
+    const content = document.getElementById('userDetailsContent');
+    
     const roleColors = {
         'admin': 'purple',
-        'doctor': 'blue', 
         'patient': 'emerald'
     };
     
-    const color = roleColors[user.role] || 'gray';
+    const roleColor = roleColors[role] || 'gray';
     
-    const content = `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- User Profile Card -->
-            <div class="lg:col-span-1">
-                <div class="bg-gradient-to-br from-${color}-50 to-${color}-100 rounded-2xl p-6 border-2 border-${color}-200">
-                    <div class="text-center">
-                        <div class="w-24 h-24 bg-gradient-to-br from-${color}-400 to-${color}-600 rounded-3xl flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4 shadow-xl">
-                            ${user.full_name ? user.full_name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
-                        </div>
-                        <h4 class="text-2xl font-bold text-gray-900 mb-2">${user.full_name || 'Not provided'}</h4>
-                        <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-${color}-100 text-${color}-800 border-2 border-${color}-200 mb-4">
-                            ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                        </div>
-                        <div class="space-y-3 text-left">
-                            <div class="flex items-center justify-between">
-                                <span class="text-gray-600">User ID:</span>
-                                <span class="font-bold text-gray-900">#${user.id}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-gray-600">Status:</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${user.is_active ? 'bg-green-100 text-green-800 border-2 border-green-200' : 'bg-red-100 text-red-800 border-2 border-red-200'}">
-                                    ${user.is_active ? 'Active' : 'Inactive'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+    content.innerHTML = `
+        <div class="space-y-6">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-${roleColor}-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                    <div class="text-3xl font-bold text-${roleColor}-600">{{ fullName|make_list|first|upper|default:email|make_list|first|upper }}</div>
                 </div>
+                <h4 class="text-xl font-bold text-gray-900">${fullName}</h4>
+                <p class="text-${roleColor}-600 font-medium">ID: #${userId} • ${userType}</p>
             </div>
-
-            <!-- Details Sections -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Basic Information -->
-                <div class="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-sm">
-                    <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-${color}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        Basic Information
-                    </h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Full Name:</span>
-                            <p class="font-bold text-gray-900">${user.full_name || 'Not provided'}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Email Address:</span>
-                            <p class="font-bold text-gray-900">${user.email}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Date Joined:</span>
-                            <p class="font-bold text-gray-900">${new Date(user.date_joined).toLocaleDateString()}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Last Login:</span>
-                            <p class="font-bold text-gray-900">${user.last_login ? new Date(user.last_login).toLocaleString() : 'Never logged in'}</p>
-                        </div>
-                    </div>
-                </div>`;
-
-    // Add doctor profile section if applicable
-    if (user.role === 'doctor' && user.doctor_profile) {
-        content += `
-                <!-- Doctor Profile -->
-                <div class="bg-white rounded-2xl p-6 border-2 border-blue-200 shadow-sm">
-                    <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                        </svg>
-                        Professional Information
-                    </h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Specialization:</span>
-                            <p class="font-bold text-gray-900">${user.doctor_profile.specialization || 'Not specified'}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">License Number:</span>
-                            <p class="font-bold text-gray-900">${user.doctor_profile.license_number || 'Not provided'}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Experience:</span>
-                            <p class="font-bold text-gray-900">${user.doctor_profile.experience || 'Not specified'}</p>
-                        </div>
-                    </div>
-                </div>`;
-    }
-
-    // Add patient profile section if applicable
-    if (user.role === 'patient' && user.patient_profile) {
-        content += `
-                <!-- Patient Profile -->
-                <div class="bg-white rounded-2xl p-6 border-2 border-emerald-200 shadow-sm">
-                    <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                        </svg>
-                        Medical Information
-                    </h5>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Date of Birth:</span>
-                            <p class="font-bold text-gray-900">${user.patient_profile.date_of_birth ? new Date(user.patient_profile.date_of_birth).toLocaleDateString() : 'Not provided'}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Gender:</span>
-                            <p class="font-bold text-gray-900">${user.patient_profile.gender || 'Not provided'}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Blood Group:</span>
-                            <p class="font-bold text-gray-900">${user.patient_profile.blood_group || 'Not provided'}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Emergency Contact:</span>
-                            <p class="font-bold text-gray-900">${user.patient_profile.emergency_contact || 'Not provided'}</p>
-                        </div>
-                    </div>
-                </div>`;
-    }
-
-    // Add activity information section
-    content += `
-                <!-- Activity Information -->
-                <div class="bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-sm">
-                    <h5 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                        </svg>
-                        Activity Status
-                    </h5>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-sm text-gray-600 font-medium">Unread Notifications:</span>
-                            <p class="font-bold text-gray-900">${user.unread_notifications}</p>
-                        </div>
-                        <div class="text-right">`;
-    
-    if (user.unread_notifications > 0) {
-        content += `
-                            <span class="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-bold bg-red-500 text-white shadow-lg">
-                                ${user.unread_notifications} New
-                            </span>`;
-    } else {
-        content += `
-                            <span class="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-bold bg-gray-200 text-gray-600">
-                                All Read
-                            </span>`;
-    }
-    
-    content += `
-                        </div>
-                    </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <span class="text-sm text-gray-600 font-medium">Email Address:</span>
+                    <p class="font-bold text-gray-900">${email}</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600 font-medium">Account Status:</span>
+                    <p class="font-bold text-gray-900">${isActive ? '✅ Active' : '❌ Inactive'}</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600 font-medium">Last Active:</span>
+                    <p class="font-bold text-gray-900">${lastLogin || 'Never'}</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600 font-medium">Member Since:</span>
+                    <p class="font-bold text-gray-900">${dateJoined}</p>
                 </div>
             </div>
         </div>
     `;
     
-    document.getElementById('userDetailsContent').innerHTML = content;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 }
+
+function closeUserDetails() {
+    const modal = document.getElementById('userDetailsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function editUser(userId) {
+    // Implement edit functionality
+    window.location.href = `/admin/users/${userId}/edit/`;
+}
+
+function editUser(userId) {
+    // Implement edit functionality
+    window.location.href = `/admin/users/${userId}/edit/`;
+}
+
+function resetPassword(userId) {
+    if (confirm('Are you sure you want to reset the password for this user?')) {
+        window.location.href = `/admin/users/${userId}/reset-password/`;
+    }
+}
+
+function activateUser(userId) {
+    if (confirm('Are you sure you want to activate this user?')) {
+        // Send activation request
+        fetch(`/admin/users/${userId}/activate/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error activating user: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error activating user');
+        });
+    }
+}
+
+function deactivateUser(userId) {
+    if (confirm('Are you sure you want to deactivate this user? This will prevent them from accessing the system.')) {
+        // Send deactivation request
+        fetch(`/admin/users/${userId}/deactivate/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deactivating user: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deactivating user');
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Close modal when clicking outside
+document.getElementById('userDetailsModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeUserDetails();
+    }
+});
 </script>
+
+<style>
+.role-transition {
+    transition: all 0.3s ease;
+}
+</style>
 {% endblock %}

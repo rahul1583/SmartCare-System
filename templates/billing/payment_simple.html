@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Simple Payment - SmartCare System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Simple Payment</h1>
+            <p class="text-gray-600">Complete your payment in one simple step</p>
+        </div>
+        
+        <!-- Bill Information -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bill Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="font-medium text-gray-600">Bill ID:</span>
+                    <span class="text-gray-800 ml-2">#{{ bill.id }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Total Amount:</span>
+                    <span class="text-gray-800 ml-2">Rs. {{ bill.total_amount }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Remaining Balance:</span>
+                    <span class="text-gray-800 ml-2 font-semibold text-green-600">Rs. {{ remaining_balance }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-600">Status:</span>
+                    <span class="text-gray-800 ml-2">{{ bill.get_status_display }}</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if remaining_balance > 0 %}
+            <!-- Simple Payment Form -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Payment Method Selection -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Select Payment Method</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Cash -->
+                        <label class="payment-method-option bg-green-50 border-2 border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100 transition-all duration-200 block">
+                            <input type="radio" name="payment_method" value="cash" checked class="sr-only">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-money-bill-wave text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Cash Payment</h4>
+                                <p class="text-sm text-gray-600 mt-1">Pay with cash</p>
+                            </div>
+                        </label>
+                        
+                        <!-- eSewa -->
+                        <label class="payment-method-option bg-emerald-50 border-2 border-emerald-200 rounded-lg p-4 cursor-pointer hover:bg-emerald-100 transition-all duration-200 block">
+                            <input type="radio" name="payment_method" value="esewa" class="sr-only">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-wallet text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">eSewa</h4>
+                                <p class="text-sm text-gray-600 mt-1">Digital wallet</p>
+                            </div>
+                        </label>
+                        
+                        <!-- Khalti -->
+                        <label class="payment-method-option bg-purple-50 border-2 border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 transition-all duration-200 block">
+                            <input type="radio" name="payment_method" value="khalti" class="sr-only">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-mobile-alt text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Khalti</h4>
+                                <p class="text-sm text-gray-600 mt-1">Mobile payment</p>
+                            </div>
+                        </label>
+                        
+                        <!-- Bank Transfer -->
+                        <label class="payment-method-option bg-blue-50 border-2 border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition-all duration-200 block">
+                            <input type="radio" name="payment_method" value="bank_transfer" class="sr-only">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-university text-white text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Bank Transfer</h4>
+                                <p class="text-sm text-gray-600 mt-1">Bank deposit</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Amount Input -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment Amount</h3>
+                    <div>
+                        <label for="amount" class="block text-gray-700 text-sm font-medium mb-2">
+                            Amount <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rs.</span>
+                            <input type="number" name="amount" id="amount" required
+                                   step="0.01" min="0" max="{{ remaining_balance }}"
+                                   value="{{ remaining_balance }}"
+                                   placeholder="0.00"
+                                   class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">Maximum: Rs. {{ remaining_balance }}</p>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="flex justify-center">
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <i class="fas fa-lock"></i>
+                        Process Payment
+                    </button>
+                </div>
+            </form>
+        {% else %}
+            <!-- Payment Complete -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-green-600 text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Payment Complete</h2>
+                <p class="text-gray-600 mb-6">This bill has been fully paid. No further payment is required.</p>
+                <a href="{% url 'billing:bill_detail' bill.id %}" 
+                   class="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors inline-flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Bill
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.payment-method-option {
+    transition: all 0.2s ease;
+}
+
+.payment-method-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.payment-method-option input[type="radio"]:checked + div {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-radius: 0.5rem;
+}
+
+.payment-method-option input[type="radio"]:checked + div::before {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #3b82f6;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
