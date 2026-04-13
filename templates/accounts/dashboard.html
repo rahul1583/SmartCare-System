@@ -285,151 +285,116 @@
                     </div>
                 </div>
 
-                <!-- Recent Prescriptions -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
-                        <div class="flex justify-between items-center text-white">
-                            <h2 class="text-xl font-bold flex items-center">
-                                <i class="fas fa-prescription-bottle-alt mr-3"></i>Latest prescriptions
-                            </h2>
-                            <a href="{% url 'prescriptions:list' %}" 
-                               class="text-purple-100 hover:text-white transition-colors flex items-center">
-                                View All
-                                <i class="fas fa-arrow-right ml-2"></i>
-                            </a>
+                <!-- Today's Activity: Prescriptions & Bills Side by Side -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Today's Prescriptions -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col">
+                        <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                            <div class="flex justify-between items-center text-white">
+                                <h2 class="text-lg font-bold flex items-center">
+                                    <i class="fas fa-prescription-bottle-alt mr-3"></i>Today's prescriptions
+                                </h2>
+                                <a href="{% url 'prescriptions:list' %}" 
+                                   class="text-purple-100 hover:text-white transition-colors">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="p-6">
-                        {% if prescriptions %}
-                            <div class="space-y-4">
-                                {% for prescription in prescriptions %}
-                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
-                                        <div class="flex items-start justify-between gap-3">
-                                            <div class="min-w-0">
-                                                <h4 class="font-semibold text-gray-900">{{ prescription.patient.get_full_name|default:prescription.patient.email }}</h4>
-                                                <div class="flex flex-wrap items-center gap-2 mb-2 mt-1">
-                                                    <span class="text-xs px-2 py-0.5 rounded-full {% if prescription.consultation_type == 'online_consultant' %}bg-blue-100 text-blue-800{% else %}bg-green-100 text-green-800{% endif %}">
-                                                        {% if prescription.consultation_type == 'online_consultant' %}<i class="fas fa-video mr-1"></i>Online{% else %}<i class="fas fa-clinic-medical mr-1"></i>In person{% endif %}
-                                                    </span>
-                                                    <span class="text-xs text-gray-500">{{ prescription.medications.count }} medication{{ prescription.medications.count|pluralize }}</span>
-                                                    <span class="text-xs text-gray-400">{{ prescription.created_at|date:"M j, Y g:i A" }}</span>
-                                                    <span class="text-xs text-gray-400">· {{ prescription.created_at|timesince }} ago</span>
+                        
+                        <div class="p-6 flex-1">
+                            {% if prescriptions %}
+                                <div class="space-y-4">
+                                    {% for prescription in prescriptions %}
+                                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="min-w-0">
+                                                    <h4 class="font-semibold text-gray-900 text-sm truncate">{{ prescription.patient.get_full_name|default:prescription.patient.email }}</h4>
+                                                    <div class="flex flex-wrap items-center gap-2 mb-2 mt-1">
+                                                        <span class="text-[10px] px-2 py-0.5 rounded-full {% if prescription.consultation_type == 'online_consultant' %}bg-blue-100 text-blue-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                                            {% if prescription.consultation_type == 'online_consultant' %}Online{% else %}In person{% endif %}
+                                                        </span>
+                                                        <span class="text-[10px] text-gray-400">{{ prescription.created_at|time:"g:i A" }}</span>
+                                                    </div>
+                                                    <p class="text-gray-700 text-xs line-clamp-2">{{ prescription.diagnosis }}</p>
                                                 </div>
-                                                <p class="text-gray-700 text-sm">{{ prescription.diagnosis|truncatechars:120 }}</p>
-                                            </div>
-                                            <div class="text-right flex-shrink-0">
-                                                <a href="{% url 'prescriptions:detail' prescription.id %}" class="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium text-sm">
-                                                    <i class="fas fa-eye mr-1"></i>Open
-                                                </a>
+                                                <div class="text-right flex-shrink-0">
+                                                    <a href="{% url 'prescriptions:detail' prescription.id %}" class="text-purple-600 hover:text-purple-800">
+                                                        <i class="fas fa-external-link-alt text-sm"></i>
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center py-8">
-                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <i class="fas fa-prescription-bottle-alt text-gray-400 text-xl"></i>
+                                    {% endfor %}
                                 </div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">No prescriptions yet</h3>
-                                <p class="text-gray-600">Start prescribing medications to patients</p>
-                            </div>
-                        {% endif %}
+                            {% else %}
+                                <div class="text-center py-8">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-prescription-bottle-alt text-gray-400 text-xl"></i>
+                                    </div>
+                                    <h3 class="text-sm font-medium text-gray-900 mb-1">No prescriptions today</h3>
+                                    <p class="text-xs text-gray-600">Prescriptions you write today will appear here</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
 
-                <!-- Recent Bills with Payment Status -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4">
-                        <div class="flex justify-between items-center text-white">
-                            <h2 class="text-xl font-bold flex items-center">
-                                <i class="fas fa-file-invoice-dollar mr-3"></i>Latest bills
-                            </h2>
-                            <a href="{% url 'billing:bill_list' %}" 
-                               class="text-orange-100 hover:text-white transition-colors flex items-center">
-                                View All
-                                <i class="fas fa-arrow-right ml-2"></i>
-                            </a>
+                    <!-- Today's Bills with Payment Status -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col">
+                        <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4">
+                            <div class="flex justify-between items-center text-white">
+                                <h2 class="text-lg font-bold flex items-center">
+                                    <i class="fas fa-file-invoice-dollar mr-3"></i>Today's bills
+                                </h2>
+                                <a href="{% url 'billing:bill_list' %}" 
+                                   class="text-orange-100 hover:text-white transition-colors">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="p-6">
-                        {% if bills_with_payments %}
-                            <div class="space-y-4">
-                                {% for bill_data in bills_with_payments %}
-                                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex-1">
-                                                <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-                                                    <h4 class="font-semibold text-gray-900">Bill #{{ bill_data.bill.id }}</h4>
-                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                                                        {% if bill_data.is_fully_paid %}bg-green-100 text-green-800
-                                                        {% elif bill_data.paid_amount == 0 %}bg-gray-100 text-gray-800
-                                                        {% elif bill_data.bill.status == 'sent' or bill_data.bill.status == 'pending' %}bg-yellow-100 text-yellow-800
-                                                        {% else %}bg-amber-100 text-amber-900{% endif %}">
-                                                        {% if bill_data.is_fully_paid %}Paid
-                                                        {% elif bill_data.paid_amount == 0 %}Unpaid
-                                                        {% else %}Partially paid{% endif %}
-                                                    </span>
-                                                </div>
-                                                <p class="text-sm text-gray-600 mb-2">
-                                                    Patient: {{ bill_data.bill.patient.get_full_name|default:bill_data.bill.patient.email }}
-                                                </p>
-                                                <p class="text-sm text-gray-600 mb-3">
-                                                    {{ bill_data.bill.created_at|date:"F d, Y" }}
-                                                </p>
-                                                
-                                                <!-- Payment Summary -->
-                                                <div class="bg-gray-50 rounded-lg p-3 space-y-1">
-                                                    <div class="flex justify-between text-sm">
-                                                        <span class="text-gray-600">Total Amount:</span>
-                                                        <span class="font-medium text-gray-900">Rs. {{ bill_data.bill.total_amount }}</span>
+                        
+                        <div class="p-6 flex-1">
+                            {% if bills_with_payments %}
+                                <div class="space-y-4">
+                                    {% for bill_data in bills_with_payments %}
+                                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="flex items-center justify-between mb-1">
+                                                        <h4 class="font-semibold text-gray-900 text-sm">Bill #{{ bill_data.bill.id }}</h4>
+                                                        <span class="text-[10px] font-bold text-gray-900">Rs. {{ bill_data.bill.total_amount }}</span>
                                                     </div>
-                                                    <div class="flex justify-between text-sm">
-                                                        <span class="text-gray-600">Amount Paid:</span>
-                                                        <span class="font-medium text-green-600">Rs. {{ bill_data.paid_amount }}</span>
+                                                    <p class="text-[11px] text-gray-600 truncate mb-2">
+                                                        {{ bill_data.bill.patient.get_full_name|default:bill_data.bill.patient.email }}
+                                                    </p>
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full 
+                                                            {% if bill_data.is_fully_paid %}bg-green-100 text-green-800
+                                                            {% elif bill_data.paid_amount == 0 %}bg-gray-100 text-gray-800
+                                                            {% else %}bg-amber-100 text-amber-900{% endif %}">
+                                                            {% if bill_data.is_fully_paid %}Paid
+                                                            {% elif bill_data.paid_amount == 0 %}Unpaid
+                                                            {% else %}Partial{% endif %}
+                                                        </span>
+                                                        <a href="{% url 'billing:bill_detail' bill_data.bill.id %}" 
+                                                           class="text-orange-600 hover:text-orange-800 text-[11px] font-medium">
+                                                            View <i class="fas fa-chevron-right ml-0.5"></i>
+                                                        </a>
                                                     </div>
-                                                    {% if bill_data.remaining_balance > 0 %}
-                                                        <div class="flex justify-between text-sm pt-2 border-t border-gray-200">
-                                                            <span class="text-gray-700 font-medium">Remaining:</span>
-                                                            <span class="font-bold text-orange-600">Rs. {{ bill_data.remaining_balance }}</span>
-                                                        </div>
-                                                        <div class="mt-2 p-2 bg-orange-100 rounded">
-                                                            <p class="text-xs text-orange-800">
-                                                                <i class="fas fa-info-circle mr-1"></i>
-                                                                Rs. {{ bill_data.remaining_balance }} remaining to be paid
-                                                            </p>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="mt-2 p-2 bg-green-100 rounded">
-                                                            <p class="text-xs text-green-800">
-                                                                <i class="fas fa-check-circle mr-1"></i>
-                                                                Bill fully paid
-                                                            </p>
-                                                        </div>
-                                                    {% endif %}
                                                 </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <a href="{% url 'billing:bill_detail' bill_data.bill.id %}" 
-                                                   class="text-orange-600 hover:text-orange-800 font-medium text-sm">
-                                                    <i class="fas fa-eye mr-1"></i>View Details
-                                                </a>
                                             </div>
                                         </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center py-8">
-                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <i class="fas fa-file-invoice-dollar text-gray-400 text-xl"></i>
+                                    {% endfor %}
                                 </div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">No bills yet</h3>
-                                <p class="text-gray-600">Bills will appear here when you create them for appointments</p>
-                            </div>
-                        {% endif %}
+                            {% else %}
+                                <div class="text-center py-8">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <i class="fas fa-file-invoice-dollar text-gray-400 text-xl"></i>
+                                    </div>
+                                    <h3 class="text-sm font-medium text-gray-900 mb-1">No bills today</h3>
+                                    <p class="text-xs text-gray-600">Invoices generated today will appear here</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -475,21 +475,23 @@ def dashboard_view(request):
         context['confirmed_appointments_count'] = today_appt_qs.filter(status='confirmed').count()
         context['pending_appointments_count'] = today_appt_qs.filter(status='pending').count()
 
-        recent_prescriptions = (
-            Prescription.objects.filter(doctor=user)
+        # Filter today's prescriptions only
+        today_prescriptions = (
+            Prescription.objects.filter(doctor=user, created_at__date=today)
             .select_related('patient')
             .prefetch_related('medications')
-            .order_by('-created_at')[:8]
+            .order_by('-created_at')
         )
-        context['prescriptions'] = recent_prescriptions
+        context['prescriptions'] = today_prescriptions
 
-        recent_bill_qs = (
-            Bill.objects.filter(doctor=user)
+        # Filter today's bills only
+        today_bill_qs = (
+            Bill.objects.filter(doctor=user, created_at__date=today)
             .select_related('patient')
-            .order_by('-created_at')[:8]
+            .order_by('-created_at')
         )
         bills_with_payments = []
-        for bill in recent_bill_qs:
+        for bill in today_bill_qs:
             paid = bill.get_paid_amount()
             remaining = bill.get_remaining_balance()
             bills_with_payments.append(
@@ -577,6 +579,13 @@ def admin_dashboard_view(request):
         messages.error(request, 'Access denied! Admin access required.')
         return redirect('accounts:dashboard')
 
+    context = _get_admin_dashboard_context()
+    context['user'] = request.user
+    return render(request, 'accounts/admin_dashboard_professional.html', context)
+
+
+def _get_admin_dashboard_context():
+    """Collect reusable admin dashboard metrics for template and API."""
     # Core counts
     total_users = User.objects.count()
     total_doctors = User.objects.filter(role='doctor').count()
@@ -586,6 +595,8 @@ def admin_dashboard_view(request):
     # Revenue from billing (fallback to 0 on error)
     bills_with_payments = []
     recent_appointments = []
+    appointments_today_count = 0
+    paid_transactions_today_count = 0
     try:
         from billing.models import Bill
         from appointments.models import Appointment
@@ -597,6 +608,9 @@ def admin_dashboard_view(request):
         
         # Get today's bills
         recent_bills = Bill.objects.filter(created_at__date=today).order_by('-created_at')[:5]
+        paid_transactions_today_count = Bill.objects.filter(
+            created_at__date=today, status='paid'
+        ).count()
         for bill in recent_bills:
             remaining = bill.get_remaining_balance()
             bills_with_payments.append({
@@ -605,7 +619,10 @@ def admin_dashboard_view(request):
             })
             
         # Get today's appointments
-        recent_appointments = Appointment.objects.filter(date_time__date=today).order_by('-date_time')[:5]
+        recent_appointments = Appointment.objects.filter(
+            date_time__date=today
+        ).order_by('-date_time')[:5]
+        appointments_today_count = Appointment.objects.filter(date_time__date=today).count()
     except Exception:
         total_revenue = 0
 
@@ -620,13 +637,60 @@ def admin_dashboard_view(request):
         'total_revenue': total_revenue,
         'system_health': 'Healthy',
         'server_uptime': '99.9%',
-        'user': request.user,
         'pending_doctors': pending_doctors,
         'recent_appointments': recent_appointments,
         'bills_with_payments': bills_with_payments,
+        'appointments_today_count': appointments_today_count,
+        'paid_transactions_today_count': paid_transactions_today_count,
+        'pending_doctors_count': pending_doctors.count(),
     }
 
-    return render(request, 'accounts/admin_dashboard_professional.html', context)
+    return context
+
+
+@login_required
+def admin_dashboard_live_data_view(request):
+    """Return live dashboard data for periodic client-side refresh."""
+    if not request.user.is_admin:
+        return JsonResponse({'error': 'Access denied'}, status=403)
+
+    context = _get_admin_dashboard_context()
+
+    appointments_payload = []
+    for appt in context['recent_appointments'][:4]:
+        appointments_payload.append({
+            'patient_initial': (appt.patient.username or 'U')[:1].upper(),
+            'patient_name': appt.patient.get_full_name() or appt.patient.username,
+            'doctor_name': appt.doctor.get_full_name() or appt.doctor.username,
+            'time': appt.date_time.strftime('%I:%M %p').lstrip('0'),
+            'status': appt.status,
+        })
+
+    transactions_payload = []
+    for bill_data in context['bills_with_payments'][:4]:
+        bill = bill_data['bill']
+        transactions_payload.append({
+            'id': bill.id,
+            'patient_name': bill.patient.get_full_name() or bill.patient.username,
+            'total_amount': str(bill.total_amount),
+            'is_fully_paid': bill_data['is_fully_paid'],
+        })
+
+    return JsonResponse({
+        'stats': {
+            'total_users': context['total_users'],
+            'total_doctors': context['total_doctors'],
+            'total_patients': context['total_patients'],
+            'total_prescriptions': context['total_prescriptions'],
+            'total_revenue': str(context['total_revenue']),
+            'pending_doctors_count': context['pending_doctors_count'],
+            'appointments_today_count': context['appointments_today_count'],
+            'paid_transactions_today_count': context['paid_transactions_today_count'],
+        },
+        'recent_appointments': appointments_payload,
+        'recent_transactions': transactions_payload,
+        'timestamp': timezone.now().strftime('%I:%M:%S %p').lstrip('0'),
+    })
 
 @login_required
 def admin_add_user_view(request):

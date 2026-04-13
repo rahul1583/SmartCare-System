@@ -20,6 +20,7 @@ urlpatterns = [
     
     # Admin URLs
     path('admin/dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
+    path('admin/dashboard/live-data/', views.admin_dashboard_live_data_view, name='admin_dashboard_live_data'),
     path('admin/add-user/', views.admin_add_user_view, name='admin_add_user'),
     path('admin/users/', views.admin_users_view, name='admin_users'),
     path('admin/users/export/', views.export_users_csv, name='export_users_csv'),
