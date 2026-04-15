@@ -222,6 +222,16 @@ class CustomLoginView(SuccessMessageMixin, LoginView):
     template_name = 'accounts/login.html'
     redirect_authenticated_user = True
     success_message = "User login successfully"
+
+    def get_success_message(self, cleaned_data):
+        user = self.request.user
+        if user.is_admin:
+            return "Admin login successfully."
+        elif user.is_doctor:
+            return "Doctor login successfully."
+        elif user.is_patient:
+            return "Patient login successfully."
+        return self.success_message
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1000,6 +1010,8 @@ def approve_doctor_view(request, doctor_id):
     """Approve a doctor's registration"""
     if not request.user.is_admin:
         return JsonResponse({'error': 'Access denied'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
     
     doctor_profile = get_object_or_404(DoctorProfile, id=doctor_id)
     doctor_profile.is_approved = True
@@ -1017,6 +1029,8 @@ def reject_doctor_view(request, doctor_id):
     """Reject and remove a doctor's registration"""
     if not request.user.is_admin:
         return JsonResponse({'error': 'Access denied'}, status=403)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
     
     doctor_profile = get_object_or_404(DoctorProfile, id=doctor_id)
     user = doctor_profile.user

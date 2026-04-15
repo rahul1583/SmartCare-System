@@ -36,9 +36,14 @@ if env_path.exists():
 SECRET_KEY = 'django-insecure-zr(s)mh4z3xq)-k1ufbdo4m0caeo3!-s0azmu39am0wou7ba@e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'testserver', 'smartcare-syatem.onrender.com', ]
+_default_allowed_hosts = 'localhost,127.0.0.1,[::1],testserver,smartcare-system.onrender.com'
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv('DJANGO_ALLOWED_HOSTS', _default_allowed_hosts).split(',')
+    if host.strip()
+]
 
 
 # Application definition
@@ -231,17 +236,25 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# CSRF Trusted Origins for browser preview
-CSRF_TRUSTED_ORIGINS = [
-    "http://127.0.0.1:57199",
-    "http://localhost:57199",
-    "http://127.0.0.1:56725",
-    "http://localhost:56725",
-    "http://127.0.0.1:58686",
-    "http://localhost:58686",
-    "http://127.0.0.1:60017",
-    "http://localhost:60017",
+# CSRF trusted origins (production + local preview/dev)
+_default_csrf_origins = [
+    'https://smartcare-system.onrender.com',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
 ]
+
+if SITE_URL.startswith('http://') or SITE_URL.startswith('https://'):
+    _default_csrf_origins.append(SITE_URL.rstrip('/'))
+
+CSRF_TRUSTED_ORIGINS = _default_csrf_origins.copy()
+
+extra_csrf_origins = os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS', '')
+if extra_csrf_origins.strip():
+    CSRF_TRUSTED_ORIGINS.extend(
+        origin.strip()
+        for origin in extra_csrf_origins.split(',')
+        if origin.strip()
+    )
 
 # Email settings for password reset and notifications
 # Default: console backend (no real delivery). Set EMAIL_BACKEND + credentials in .env for SMTP.

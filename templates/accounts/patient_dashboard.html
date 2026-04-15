@@ -7,7 +7,7 @@
 <div class="min-h-screen bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Welcome Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-xl p-8 mb-8 text-white">
+        <div class="rounded-2xl p-8 mb-8 text-white" style="background: linear-gradient(90deg, #2563EB 0%, #1D4ED8 100%); box-shadow: 0 12px 32px rgba(37, 99, 235, 0.28);">
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-4xl font-bold mb-2">Welcome back, {{ user.get_full_name|default:user.email }}</h1>

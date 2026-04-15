@@ -444,17 +444,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function approveDoctor(doctorId) {
     if (!confirm('Are you sure you want to approve this doctor?')) return;
-    
+
+    const csrfToken = getCsrfToken();
     fetch(`/accounts/admin/doctors/${doctorId}/approve/`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
+            'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(async response => ({ status: response.status, data: await response.json() }))
     .then(data => {
-        if (data.success) {
+        if (data.data.success) {
             const row = document.getElementById(`doctor-row-${doctorId}`);
             row.classList.add('opacity-0', 'transition-opacity', 'duration-500');
             setTimeout(() => {
@@ -464,7 +466,8 @@ function approveDoctor(doctorId) {
                 }
             }, 500);
         } else {
-            alert('Error: ' + data.error);
+            const msg = data.data.error || `Request failed (${data.status})`;
+            alert('Error: ' + msg);
         }
     })
     .catch(error => alert('Error approving doctor: ' + error));
@@ -472,17 +475,19 @@ function approveDoctor(doctorId) {
 
 function rejectDoctor(doctorId) {
     if (!confirm('Are you sure you want to reject and remove this registration? This cannot be undone.')) return;
-    
+
+    const csrfToken = getCsrfToken();
     fetch(`/accounts/admin/doctors/${doctorId}/reject/`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
+            'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(async response => ({ status: response.status, data: await response.json() }))
     .then(data => {
-        if (data.success) {
+        if (data.data.success) {
             const row = document.getElementById(`doctor-row-${doctorId}`);
             row.classList.add('opacity-0', 'transition-opacity', 'duration-500');
             setTimeout(() => {
@@ -492,10 +497,18 @@ function rejectDoctor(doctorId) {
                 }
             }, 500);
         } else {
-            alert('Error: ' + data.error);
+            const msg = data.data.error || `Request failed (${data.status})`;
+            alert('Error: ' + msg);
         }
     })
     .catch(error => alert('Error rejecting doctor: ' + error));
+}
+
+function getCsrfToken() {
+    const cookie = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith('csrftoken='));
+    return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
 }
 </script>
 {% endblock %}
