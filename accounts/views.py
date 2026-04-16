@@ -276,6 +276,21 @@ class CustomLoginView(SuccessMessageMixin, LoginView):
         else:
             return reverse_lazy('accounts:dashboard')
 
+from functools import wraps
+from django.http import JsonResponse, HttpResponseRedirect
+from django.contrib.auth import login as auth_login
+
+def ajax_login_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or \
+               'application/json' in request.headers.get('Accept', ''):
+                return JsonResponse({'error': 'Session expired. Please log in again.'}, status=401)
+            return redirect('accounts:login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
 def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST, request.FILES)
@@ -951,7 +966,19 @@ def export_users_csv(request):
     
     return response
 
-@login_required
+def csrf_failure_view(request, reason=""):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or \
+       'application/json' in request.headers.get('Accept', ''):
+        return JsonResponse({
+            'success': False,
+            'error': f'CSRF verification failed: {reason}. Please refresh the page.'
+        }, status=403)
+    
+    # Fallback to default behavior for non-AJAX
+    from django.views.csrf import csrf_failure
+    return csrf_failure(request, reason)
+
+@ajax_login_required
 def toggle_user_status(request, user_id):
     if not request.user.is_admin:
         return JsonResponse({'error': 'Access denied'}, status=403)
@@ -973,7 +1000,7 @@ def toggle_user_status(request, user_id):
         logger.exception("Error in toggle_user_status")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-@login_required
+@ajax_login_required
 def delete_user(request, user_id):
     """Delete user functionality for admins"""
     if not request.user.is_admin:
@@ -1015,7 +1042,7 @@ def pending_doctors_view(request):
     pending_doctors = DoctorProfile.objects.filter(is_approved=False).select_related('user')
     return render(request, 'accounts/pending_doctors.html', {'pending_doctors': pending_doctors})
 
-@login_required
+@ajax_login_required
 def approve_doctor_view(request, doctor_id):
     """Approve a doctor's registration"""
     if not request.user.is_admin:
@@ -1044,7 +1071,7 @@ def approve_doctor_view(request, doctor_id):
             'error': str(e)
         }, status=500)
 
-@login_required
+@ajax_login_required
 def reject_doctor_view(request, doctor_id):
     """Reject and remove a doctor's registration"""
     if not request.user.is_admin:
